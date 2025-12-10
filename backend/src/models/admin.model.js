@@ -28,10 +28,7 @@ const Admin = sequelize.define(
         notEmpty: true,
       },
     },
-    passwordHash: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
+    // passwordHash removed - handled by Supabase
     position: {
       type: DataTypes.STRING,
       allowNull: false,

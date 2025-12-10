@@ -1,6 +1,6 @@
 // controllers/adminStaff.controller.js
 import Admin from '../models/admin.model.js';
-import bcrypt from 'bcryptjs';
+import { supabase } from '../lib/supabase.js';
 import cloudinary from '../lib/cloudinary.js';
 import { Op } from 'sequelize';
 
@@ -68,9 +68,26 @@ export const addStaff = async (req, res) => {
       });
     }
 
-    // Hash password
-    const salt = await bcrypt.genSalt(10);
-    const passwordHash = await bcrypt.hash(password, salt);
+    // 1. Create user in Supabase Auth
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          username,
+          role: role || 'editor',
+          position,
+        },
+      },
+    });
+
+    if (authError) {
+      return res.status(400).json({ message: authError.message });
+    }
+
+    if (!authData.user) {
+      return res.status(400).json({ message: 'Failed to create staff account in Supabase' });
+    }
 
     // Upload avatar if provided
     let avatarUrl = null;
@@ -79,24 +96,21 @@ export const addStaff = async (req, res) => {
       avatarUrl = uploadedAvatar.url;
     }
 
-    // Create new admin
+    // Create new admin in local DB using Supabase ID
     const newAdmin = await Admin.create({
+      id: authData.user.id,
       username,
       email,
-      passwordHash,
       position,
       role: role || 'editor',
       bio: bio || null,
       avatar: avatarUrl,
     });
 
-    // Return admin without password
-    const { passwordHash: _, ...adminData } = newAdmin.toJSON();
-
     res.status(201).json({
       success: true,
       message: 'Staff member added successfully',
-      data: adminData,
+      data: newAdmin,
     });
   } catch (error) {
     console.error('Error in addStaff controller:', error);
@@ -140,8 +154,10 @@ export const updateStaff = async (req, res) => {
 
     // Update password if provided
     if (password) {
-      const salt = await bcrypt.genSalt(10);
-      updateData.passwordHash = await bcrypt.hash(password, salt);
+      // Note: Updating another user's password requires Supabase Service Role Key
+      // or the user must do it themselves via password reset.
+      // For now, we'll skip this or you can implement it if you have the service role key.
+      console.warn('Password update for staff is not supported via this endpoint without Service Role Key.');
     }
 
     // Handle avatar update
@@ -184,13 +200,10 @@ export const updateStaff = async (req, res) => {
     // Update the admin
     await admin.update(updateData);
 
-    // Return updated admin without password
-    const { passwordHash: _, ...adminData } = admin.toJSON();
-
     res.status(200).json({
       success: true,
       message: 'Staff member updated successfully',
-      data: adminData,
+      data: admin,
     });
   } catch (error) {
     console.error('Error in updateStaff controller:', error);
@@ -198,6 +211,7 @@ export const updateStaff = async (req, res) => {
       error.name === 'SequelizeValidationError'
         ? error.errors.map((e) => e.message).join(', ')
         : error.message;
+
     res.status(500).json({ message: errorMessage });
   }
 };
@@ -207,9 +221,7 @@ export const getStaffById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const admin = await Admin.findByPk(id, {
-      attributes: { exclude: ['passwordHash'] }, // Exclude password
-    });
+    const admin = await Admin.findByPk(id);
 
     if (!admin) {
       return res.status(404).json({ message: 'Staff member not found' });
@@ -235,6 +247,12 @@ export const deleteStaff = async (req, res) => {
     if (!admin) {
       return res.status(404).json({ message: 'Staff member not found' });
     }
+
+    // Note: Deleting user from Supabase Auth requires Service Role Key.
+    // Since we only have Anon Key, we can only delete from local DB.
+    // The Supabase user will remain but won't have access to the app data.
+    // Ideally, use a server-side function with Service Role Key to delete from Supabase.
+    console.warn('Deleting staff from local DB only. Supabase user remains.');
 
     // Delete avatar from Cloudinary if exists
     if (admin.avatar) {
@@ -268,7 +286,6 @@ export const getAllStaff = async (req, res) => {
     const offset = (parseInt(page) - 1) * parseInt(limit);
 
     const { count, rows: staffs } = await Admin.findAndCountAll({
-      attributes: { exclude: ['passwordHash'] },
       limit: parseInt(limit),
       offset: offset,
       order: [['createdAt', 'DESC']],

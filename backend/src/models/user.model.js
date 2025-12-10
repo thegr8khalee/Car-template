@@ -27,10 +27,7 @@ const User = sequelize.define(
         notEmpty: true,
       },
     },
-    passwordHash: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
+    // passwordHash removed - handled by Supabase
     phoneNumber: {
       type: DataTypes.STRING,
       allowNull: true,
@@ -38,14 +35,7 @@ const User = sequelize.define(
         is: /^[\+]?[0-9]{10,15}$/,   
       },
     },
-    passwordResetToken: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    passwordResetExpires: {
-      type: DataTypes.DATE,
-      allowNull: true,
-    },
+    // passwordReset fields removed - handled by Supabase
   },
   {
     timestamps: true,

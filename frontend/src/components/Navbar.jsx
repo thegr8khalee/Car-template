@@ -73,7 +73,7 @@ const Navbar = ({ className = '' }) => {
             </div>
           </div>
 
-          <div className="navbar-center">
+          {/* <div className="navbar-center">
             <a
               className="text-lg flex items-center justify-center sm:text-2xl font-['Microgramma_D_Extended'] text-white"
               href="/"
@@ -81,7 +81,7 @@ const Navbar = ({ className = '' }) => {
               <img src={logo} alt={branding.branding.logoAlt} className="w-10 mr-2" />
               {branding.company.uppercaseName}
             </a>
-          </div>
+          </div> */}
 
           <div className="navbar-end sm:flex hidden">
             {!authUser ? (

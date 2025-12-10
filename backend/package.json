@@ -32,7 +32,8 @@
     "db:setup": "node src/scripts/setup-database.js setup",
     "db:reset": "node src/scripts/setup-database.js reset",
     "db:seed": "node src/scripts/setup-database.js seed",
-    "db:test": "node src/scripts/setup-database.js test"
+    "db:test": "node src/scripts/setup-database.js test",
+    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest"
   },
   "keywords": [],
   "author": "",

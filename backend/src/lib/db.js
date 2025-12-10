@@ -4,24 +4,32 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const sequelize = new Sequelize({
-  database: process.env.MYSQLDATABASE || 'car_blog',
-  username: process.env.MYSQLUSER || 'root',
-  password: process.env.MYSQLPASSWORD || '',
-  host: process.env.MYSQLHOST || 'localhost',
-  port: process.env.MYSQLPORT || 3306,
-  dialect: 'mysql',
-
-  // Connection pool
-  pool: {
-    max: 20,
-    min: 0,
-    acquire: 60000,
-    idle: 10000
+const sequelize = new Sequelize(process.env.DATABASE_URL, {
+  dialect: 'postgres',
+  protocol: 'postgres',
+  logging: process.env.NODE_ENV === 'development' ? console.log : false,
+  dialectOptions: {
+    ssl: {
+      require: true,
+      rejectUnauthorized: false
+    }
   },
 
-  // Logging
-  logging: process.env.NODE_ENV === 'development' ? console.log : false,
+  // Connection pool - reduced for stability
+  pool: {
+    max: 5,
+    min: 0,
+    acquire: 90000,
+    idle: 10000,
+    evict: 10000
+  },
+
+  // Retry configuration
+  retry: {
+    max: 3,
+    backoffBase: 1000,
+    backoffExponent: 1.5
+  },
 
   // Timezone
   timezone: '+00:00',
@@ -37,14 +45,6 @@ const sequelize = new Sequelize({
   // Retry on failure
   retry: {
     max: 3
-  },
-
-  // SSL for Railway
-  dialectOptions: {
-    ssl: {
-      require: true,
-      rejectUnauthorized: false
-    }
   }
 });
 

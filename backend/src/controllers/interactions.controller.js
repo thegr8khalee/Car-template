@@ -270,7 +270,7 @@ export const getAllReviews = async (req, res) => {
           fn(
             'AVG',
             literal(
-              '(interiorRating + exteriorRating + comfortRating + performanceRating) / 4'
+              '("Review"."interiorRating" + "Review"."exteriorRating" + "Review"."comfortRating" + "Review"."performanceRating") / 4'
             )
           ),
           'averageOverallRating',

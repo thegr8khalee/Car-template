@@ -311,10 +311,10 @@ const MergedNavbar = ({ className = '' }) => {
             {/* Left Section - Logo & Desktop Nav */}
             <div className="flex items-center gap-2">
               <Link to="/" className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-primary rounded-full flex justify-center items-center text-secondary font-inter font-bold text-lg p-2">
+                {/* <div className="w-8 h-8 bg-primary rounded-full flex justify-center items-center text-secondary font-inter font-bold text-lg p-2">
                   AC
-                </div>
-                <span className="text- font-['Microgramma_D_Extended'] text-secondary hidden sm:inline">
+                </div> */}
+                <span className="text- font-inter font-bold ml-2 text-secondary hidden sm:inline">
                   {branding.company.uppercaseName}
                 </span>
               </Link>

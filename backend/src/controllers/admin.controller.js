@@ -1,6 +1,5 @@
 import Admin from '../models/admin.model.js';
-import bcrypt from 'bcryptjs';
-import { generateToken } from '../lib/utils.js';
+import { supabase } from '../lib/supabase.js';
 import { Op } from 'sequelize';
 import cloudinary from '../lib/cloudinary.js';
 
@@ -29,9 +28,26 @@ export const adminSignup = async (req, res) => {
         .json({ message: 'Admin with this email or username already exists.' });
     }
 
-    // Hash the password
-    const salt = await bcrypt.genSalt(10);
-    const passwordHash = await bcrypt.hash(password, salt);
+    // 1. Sign up with Supabase Auth
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          username,
+          role: 'admin', // Custom claim or metadata
+          position,
+        },
+      },
+    });
+
+    if (authError) {
+      return res.status(400).json({ message: authError.message });
+    }
+
+    if (!authData.user) {
+      return res.status(400).json({ message: 'Signup failed' });
+    }
 
     let avatarUrl = null;
     // If an avatar is provided, upload it to Cloudinary
@@ -44,17 +60,28 @@ export const adminSignup = async (req, res) => {
 
     // Create the new admin with all fields
     const newAdmin = await Admin.create({
+      id: authData.user.id, // Use Supabase ID
       username,
       email,
-      passwordHash,
       position,
       role,
       avatar: avatarUrl, // Store the Cloudinary URL
       bio,
     });
 
-    // Generate and set the JWT token
-    generateToken(newAdmin.id, res, 'admin');
+    // Generate and set the JWT token (Supabase session)
+    // Note: In a real app, you might want to sign in immediately or ask user to verify email
+    // For now, we'll assume auto-login or manual login required.
+    // If auto-login is needed, we need the session from signUp (which might be null if email confirm is on)
+    
+    if (authData.session) {
+        res.cookie('jwt', authData.session.access_token, {
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+            httpOnly: true,
+            sameSite: 'strict',
+            secure: process.env.NODE_ENV !== 'development',
+        });
+    }
 
     // Respond with the new admin's details
     res.status(201).json({
@@ -86,34 +113,38 @@ export const adminLogin = async (req, res) => {
         .json({ message: 'Email and password are required for admin login.' });
     }
 
-    // Find the admin by email
-    const admin = await Admin.findOne({ where: { email } });
+    // 1. Sign in with Supabase Auth
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      return res.status(400).json({ message: error.message });
+    }
+
+    // Find the admin by ID (Supabase User ID)
+    const admin = await Admin.findByPk(data.user.id);
 
     // Check if admin exists
     if (!admin) {
-      return res.status(400).json({ message: 'Invalid Credentials' });
+      return res.status(403).json({ message: 'Access denied. Not an admin.' });
     }
 
-    // Compare the provided password with the stored hash
-    const isPasswordCorrect = await bcrypt.compare(
-      password,
-      admin.passwordHash
-    );
-
-    // Check if the password is correct
-    if (!isPasswordCorrect) {
-      return res.status(400).json({ message: 'Invalid Credentials' });
-    }
-
-    // Generate and set the JWT token
-    generateToken(admin.id, res, 'admin');
+    // Set cookie
+    res.cookie('jwt', data.session.access_token, {
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+        httpOnly: true,
+        sameSite: 'strict',
+        secure: process.env.NODE_ENV !== 'development',
+    });
 
     // Respond with the admin's details including the role
     res.status(200).json({
       id: admin.id,
       username: admin.username,
       email: admin.email,
-      role: admin.role, // This line has been updated
+      role: admin.role,
       createdAt: admin.createdAt,
       updatedAt: admin.updatedAt,
       message: 'Admin logged in successfully.',
@@ -124,8 +155,14 @@ export const adminLogin = async (req, res) => {
   }
 };
 
-export const adminLogout = (req, res) => {
+export const adminLogout = async (req, res) => {
   try {
+    const { error } = await supabase.auth.signOut();
+    
+    if (error) {
+        console.error('Supabase signout error:', error);
+    }
+
     res.cookie('jwt', '', {
       maxAge: 0,
       httpOnly: true,

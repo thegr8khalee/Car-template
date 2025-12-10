@@ -1,53 +1,46 @@
-// controllers/authController.js
-
 // controllers/auth.controller.js
-import User from '../models/user.model.js'; // Use the Sequelize User model
-import Admin from '../models/admin.model.js'; // Use the Sequelize Admin model
-import bcrypt from 'bcryptjs';
-import { generateToken } from '../lib/utils.js'
-import jwt from 'jsonwebtoken';
-import crypto from 'crypto';
-import nodemailer from 'nodemailer';
-import { Op } from 'sequelize'; // Import the Op object for Sequelize operators
-
-// Assuming a function to merge guest data exists in a separate file
-// import { mergeGuestDataToUser } from './guest.controller.js';
+import User from '../models/user.model.js';
+import Admin from '../models/admin.model.js';
+import { supabase } from '../lib/supabase.js';
+import { Op } from 'sequelize';
 
 export const signup = async (req, res) => {
   const { fullName, email, password, phoneNumber } = req.body;
 
   try {
-    if (!fullName) {
-      return res.status(400).json({ message: 'Full name cannot be empty' });
-    }
-    if (!email) {
-      return res.status(400).json({ message: 'Email cannot be empty' });
-    }
-    if (!password) {
-      return res.status(400).json({ message: 'Password cannot be empty' });
+    if (!fullName || !email || !password) {
+      return res.status(400).json({ message: 'All fields are required' });
     }
 
-    // Sequelize equivalent of Mongoose's findOne
-    const userExists = await User.findOne({ where: { email } });
-    if (userExists) {
-      return res.status(400).json({ message: 'Email already in use' });
+    // 1. Sign up with Supabase Auth
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          full_name: fullName,
+          phone_number: phoneNumber,
+        },
+      },
+    });
+
+    if (authError) {
+      return res.status(400).json({ message: authError.message });
     }
 
-    const salt = await bcrypt.genSalt(10);
-    const passwordHash = await bcrypt.hash(password, salt);
+    if (!authData.user) {
+      return res.status(400).json({ message: 'Signup failed' });
+    }
 
-    // Sequelize's `create` method combines model instantiation and saving
+    // 2. Create user in local PostgreSQL database
+    // We use the ID from Supabase Auth as our primary key
     const newUser = await User.create({
+      id: authData.user.id,
       username: fullName,
       email,
-      passwordHash,
       phoneNumber,
     });
 
-    // Use the id field, which is Sequelize's default primary key
-    generateToken(newUser.id, res);
-
-    // Respond with user data, using `id` instead of `_id` and excluding `passwordHash`
     res.status(201).json({
       id: newUser.id,
       username: newUser.username,
@@ -58,6 +51,8 @@ export const signup = async (req, res) => {
     });
   } catch (error) {
     console.error('Error in signup controller: ', error.message);
+    // If local DB creation fails, we might want to delete the Supabase user to keep consistency
+    // await supabase.auth.admin.deleteUser(authData.user.id);
     res.status(500).json({ message: 'Internal Server Error' });
   }
 };
@@ -70,21 +65,31 @@ export const login = async (req, res) => {
       return res.status(400).json({ message: 'All fields are required' });
     }
 
-    // Find user by email using Sequelize's `findOne`
-    const user = await User.findOne({ where: { email } });
+    // 1. Sign in with Supabase Auth
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      return res.status(400).json({ message: error.message });
+    }
+
+    // 2. Fetch user details from local DB
+    const user = await User.findByPk(data.user.id);
+
     if (!user) {
-      return res.status(400).json({ message: 'Invalid Credentials' });
+      return res.status(404).json({ message: 'User record not found' });
     }
 
-    const isPasswordCorrect = await bcrypt.compare(password, user.passwordHash);
-    if (!isPasswordCorrect) {
-      return res.status(400).json({ message: 'Invalid Credentials' });
-    }
+    // Set the access token in a cookie (or return it in the body)
+    res.cookie('jwt', data.session.access_token, {
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      httpOnly: true,
+      sameSite: 'strict',
+      secure: process.env.NODE_ENV !== 'development',
+    });
 
-    // Use the `id` field from the Sequelize model
-    generateToken(user.id, res);
-
-    // Respond with user data, excluding passwordHash
     res.status(200).json({
       id: user.id,
       username: user.username,
@@ -99,8 +104,14 @@ export const login = async (req, res) => {
   }
 };
 
-export const logout = (req, res) => {
+export const logout = async (req, res) => {
   try {
+    const { error } = await supabase.auth.signOut();
+    
+    if (error) {
+      console.error('Supabase signout error:', error);
+    }
+
     res.cookie('jwt', '', {
       maxAge: 0,
       httpOnly: true,

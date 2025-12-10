@@ -571,7 +571,6 @@ Lastly, listen to your truck. Unusual noises or reduced performance are early si
 export const resetDatabase = async () => {
   try {
     console.log('🧹 Resetting database...');
-    await sequelize.drop();
     await syncDatabase({ force: true });
     await seedData();
     console.log('✅ Database reset completed');

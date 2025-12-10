@@ -1,7 +1,7 @@
 {
   "company": {
-    "name": "Abuja car",
-    "legalName": "Abuja Car Automobile",
+    "name": "Demo Dealership",
+    "legalName": "Demo Dealership Automobile",
     "tagline": "Where automotive dreams meet expert guidance",
     "ceo": {
       "name": "Saminu",
@@ -9,7 +9,7 @@
     }
   },
   "branding": {
-    "logoAlt": "Abuja Car logo",
+    "logoAlt": "Demo Dealership logo",
     "colors": {
       "primary": "#ff0000",
       "secondary": "#000000",
@@ -39,22 +39,22 @@
   },
   "contact": {
     "emails": {
-      "info": "info@sarkinmota.com",
-      "support": "support@sarkinmota.com",
-      "sales": "sales@sarkinmota.com"
+      "info": "info@demodealership.com",
+      "support": "support@demodealership.com",
+      "sales": "sales@demodealership.com"
     },
     "phones": {
       "main": {
-        "display": "+234 701 5136 111",
-        "value": "+2347015136111"
+        "display": "+123456789",
+        "value": "+123456789"
       },
       "support": {
-        "display": "+234 701 5136 111",
-        "value": "+2347015136111"
+        "display": "+123456789",
+        "value": "+123456789"
       },
       "sales": {
-        "display": "+234 701 5136 111",
-        "value": "+2347015136111"
+        "display": "+123456789",
+        "value": "+123456789"
       }
     },
     "address": {
