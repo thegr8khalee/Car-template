@@ -1,1 +1,1 @@
-This is a car dealership template
+This is a dealership template
