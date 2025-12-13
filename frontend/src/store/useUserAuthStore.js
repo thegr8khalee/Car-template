@@ -32,10 +32,17 @@ export const useUserAuthStore = create((set, get) => ({
     set({ isLoading: true });
     try {
       const res = await axiosInstance.post('/user/auth/signup', data);
-      set({ authUser: res.data });
-      toast.success('account created');
+      if (res.data.emailConfirmationRequired) {
+        toast.success(res.data.message);
+        return { success: true, emailConfirmationRequired: true };
+      } else {
+        set({ authUser: res.data });
+        toast.success('account created');
+        return { success: true, emailConfirmationRequired: false };
+      }
     } catch (error) {
       toast.error(error.response.data.message);
+      return { success: false, error: error.response.data.message };
     } finally {
       set({ isLoading: false });
     }

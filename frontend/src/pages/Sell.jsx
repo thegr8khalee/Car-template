@@ -86,9 +86,6 @@ const LearnMoreSell = () => {
     <div className="bg-base-200">
       {/* Mobile View */}
       <div id="mobile-view" className="sm:hidden">
-        <section className="w-full sticky top-0 bg-secondary pt-16 px-4 h-16 z-50">
-          <hr className="border-t border-gray-500" />
-        </section>
         {/* Hero Section */}
         <section className="pt-16 bg-secondary py-12 px-4">
           <motion.div
@@ -247,9 +244,6 @@ const LearnMoreSell = () => {
 
       {/* Desktop View */}
       <div id="desktop-view" className="hidden sm:block">
-        <section className="w-full sticky top-0 bg-secondary pt-16 px-4 h-16 z-50">
-          <hr className="border-t border-gray-500" />
-        </section>
         {/* Hero Section */}
         <section className="bg-secondary py-20 px-4">
           <div className="max-w-6xl mx-auto">

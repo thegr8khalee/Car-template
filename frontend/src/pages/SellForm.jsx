@@ -138,9 +138,7 @@ const SellCarPage = () => {
 
   return (
     <div className="min-h-screen bg-base-200">
-      <section className="w-full sticky top-0 bg-secondary pt-16 px-4 h-16 z-50">
-          <hr className="border-t border-gray-500" />
-        </section>
+
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center gap-4 mb-8">

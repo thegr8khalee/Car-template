@@ -1,6 +1,6 @@
 // src/pages/AdminSignupPage.jsx
 import React, { useState } from 'react';
-// import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useUserAuthStore } from '../store/useUserAuthStore'; // Import your Zustand auth store
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -16,7 +16,7 @@ const SignupPage = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   // React Router hook for navigation
-  //   const navigate = useNavigate();
+  const navigate = useNavigate();
 
   // Access authUser and isAdmin from the store to handle redirection if already logged in as admin
   const { signup, isLoading } = useUserAuthStore();
@@ -26,7 +26,10 @@ const SignupPage = () => {
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await signup(formData);
+    const result = await signup(formData);
+    if (result?.emailConfirmationRequired) {
+      navigate('/verify-email-sent');
+    }
   };
 
   const [isFocusedName, setIsFocusedName] = useState(false);
@@ -35,21 +38,10 @@ const SignupPage = () => {
   const [isFocusedPassword, setIsFocusedPassword] = useState(false);
   //   const [isFocusedAnonymousId, setIsFocusedAnonymousId] = useState(false);
 
-  // If loading, show a simple loading message
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <Loader2 className="animate-spin" />
-      </div>
-    );
-  }
-
   // Render the login form
   return (
     <div>
-      <section className="w-full sticky top-0 bg-secondary pt-16 px-4 h-16 z-50">
-        <hr className="border-t border-gray-500" />
-      </section>
+
       <div className="p-4 flex justify-center items-center h-screen bg-base-300 font-inter">
         <div className="card w-xl bg-base-100 shadow-xl rounded-2xl">
           <div className="card-body p-8">

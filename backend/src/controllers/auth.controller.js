@@ -41,14 +41,29 @@ export const signup = async (req, res) => {
       phoneNumber,
     });
 
-    res.status(201).json({
-      id: newUser.id,
-      username: newUser.username,
-      email: newUser.email,
-      phoneNumber: newUser.phoneNumber,
-      createdAt: newUser.createdAt,
-      updatedAt: newUser.updatedAt,
-    });
+    if (authData.session) {
+      res.cookie('jwt', authData.session.access_token, {
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+        httpOnly: true,
+        sameSite: 'strict',
+        secure: process.env.NODE_ENV !== 'development',
+      });
+
+      res.status(201).json({
+        id: newUser.id,
+        username: newUser.username,
+        email: newUser.email,
+        phoneNumber: newUser.phoneNumber,
+        createdAt: newUser.createdAt,
+        updatedAt: newUser.updatedAt,
+      });
+    } else {
+      res.status(200).json({
+        message:
+          'Signup successful. Please check your email to verify your account.',
+        emailConfirmationRequired: true,
+      });
+    }
   } catch (error) {
     console.error('Error in signup controller: ', error.message);
     // If local DB creation fails, we might want to delete the Supabase user to keep consistency

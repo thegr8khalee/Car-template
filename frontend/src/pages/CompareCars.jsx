@@ -126,7 +126,7 @@ const CompareCars = () => {
             onClick={() => navigate(`/car/${car.id}`)}
             className='btn btn-primary rounded-full'>
               View Details
-              <ArrowUpRight className="stroke-secondary size-5 ml-1" />
+              {/* <ArrowUpRight className="stroke-secondary size-5 ml-1" /> */}
             </button>
           </div>
         </div>
@@ -181,9 +181,9 @@ const CompareCars = () => {
 
   return (
     <div className="min-h-screen bg-base-200 font-inter">
-      <div className="bg-secondary h-16 w-full sticky top-0 z-50"></div>
+      {/* <div className="bg-secondary h-16 w-full sticky top-0 z-50"></div> */}
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-4 py-35">
         {/* Header */}
         <div className="mb-8">
           <button
@@ -353,9 +353,11 @@ const CompareCars = () => {
         {!selectedCar2 && relatedCars.length > 0 && (
           <div className="mb-12">
             <h2 className="text-2xl font-bold mb-4">Suggested Cars to Compare</h2>
-            <div className="flex overflow-x-auto gap-4 pb-4">
+            <div className="flex overflow-x-auto gap-4 pb-4"
+            style={{ scrollbarWidth: 'none'}}
+            >
               {relatedCars.map((car) => (
-                <CarCardSuggestion
+                <CarCard
                   key={car.id}
                   className="flex-shrink-0"
                   image={car.imageUrls[0]}

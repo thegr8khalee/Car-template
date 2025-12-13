@@ -196,19 +196,21 @@ export const getRelatedBlogsById = async (req, res) => {
 
     // 2. Shared car IDs
     if (targetBlog.carIds && targetBlog.carIds.length > 0) {
-      // Using JSON_OVERLAPS for MySQL or JSON array operations
+      // Using Postgres JSONB operator ?| (exists any)
+      const carIdsArray = targetBlog.carIds.map(id => `'${id}'`).join(',');
       orConditions.push(
         sequelize.literal(
-          `JSON_OVERLAPS(carIds, '${JSON.stringify(targetBlog.carIds)}')`
+          `CAST("carIds" AS jsonb) ?| ARRAY[${carIdsArray}]`
         )
       );
     }
 
     // 3. Shared tags
     if (targetBlog.tags && targetBlog.tags.length > 0) {
+      const tagsArray = targetBlog.tags.map(tag => `'${tag}'`).join(',');
       orConditions.push(
         sequelize.literal(
-          `JSON_OVERLAPS(tags, '${JSON.stringify(targetBlog.tags)}')`
+          `CAST("tags" AS jsonb) ?| ARRAY[${tagsArray}]`
         )
       );
     }
@@ -241,15 +243,11 @@ export const getRelatedBlogsById = async (req, res) => {
               ELSE 0
             END +
             CASE 
-              WHEN JSON_OVERLAPS(carIds, '${JSON.stringify(
-                targetBlog.carIds || []
-              )}') THEN 2
+              WHEN CAST("carIds" AS jsonb) ?| ARRAY[${(targetBlog.carIds || []).map(id => `'${id}'`).join(',')}] THEN 2
               ELSE 0
             END +
             CASE 
-              WHEN JSON_OVERLAPS(tags, '${JSON.stringify(
-                targetBlog.tags || []
-              )}') THEN 1
+              WHEN CAST("tags" AS jsonb) ?| ARRAY[${(targetBlog.tags || []).map(tag => `'${tag}'`).join(',')}] THEN 1
               ELSE 0
             END
           `),
@@ -257,7 +255,7 @@ export const getRelatedBlogsById = async (req, res) => {
         ],
       ],
       order: [
-        [sequelize.literal('relevanceScore'), 'DESC'],
+        [sequelize.literal('"relevanceScore"'), 'DESC'],
         ['viewCount', 'DESC'],
         ['publishedAt', 'DESC'],
       ],

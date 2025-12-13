@@ -3,7 +3,7 @@ import React, {
   useEffect,
   useRef,
 } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Menu,
@@ -15,6 +15,7 @@ import SearchFilters from './SearchFilters';
 import { PiCar, PiGridFour, PiInfo, PiPhone, PiShield, PiSteeringWheel } from 'react-icons/pi';
 
 const MergedNav = () => {
+  const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
@@ -28,7 +29,7 @@ const MergedNav = () => {
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      const YOffset = window.location.pathname === '/' ? 600 : 0;
+      const YOffset = location.pathname === '/' ? 600 : 0;
       
       if (currentScrollY > YOffset) {
         setIsScrolled(true);
@@ -64,7 +65,9 @@ const MergedNav = () => {
     };
   }, [isAccountMenuOpen, isProfileMenuOpen]);
 
-  const isHomepage = typeof window !== 'undefined' ? window.location.pathname === '/' : false;
+  const isHomepage = location.pathname === '/';
+  const hideSearchRoutes = ['/profile', '/signup', '/verify-email-sent', '/login'];
+  const showSearch = !hideSearchRoutes.includes(location.pathname);
 
   useEffect(() => {
     if (!isHomepage) {
@@ -80,21 +83,28 @@ const MergedNav = () => {
   }, [isHomepage]);
 
   return (
-    <div className={`sticky top-0 w-full z-50 transition-all duration-300 ${isScrolled ? 'bg-gray-200' : 'bg-linear-to-b from-white to-transparent'}`}>
+    <div className={`sticky top-0 w-full z-50 transition-all duration-300 ${isScrolled ? 'bg-white shadow-sm' : 'bg-gradient-to-b from-white to-transparent'}`}>
       <motion.header className="absolute w-full" initial={isHomepage ? { y: -50, opacity: 0 } : false} animate={isHomepage ? { y: isNavVisible ? 0 : -50, opacity: isNavVisible ? 1 : 0 } : undefined} transition={{ type: 'spring', stiffness: 260, damping: 28 }}>
-        <div className={`gap-2 p-2 px-4 transition-colors duration-200 ${isScrolled || !isHomepage ? 'bg-gray-100' : 'bg-linear-to-b from-black/50 to-transparent'}`}>
+        <div className={`gap-2 p-2 px-4 transition-colors duration-200 ${isScrolled || !isHomepage ? 'bg-white' : 'bg-gradient-to-b from-black/50 to-transparent'}`}>
           <motion.div 
-            initial={{ height: 'auto', opacity: 1, marginBottom: '0.5rem' }}
-            animate={{ 
-              height: showTopBar ? 'auto' : 0, 
-              opacity: showTopBar ? 1 : 0,
-              marginBottom: showTopBar ? '0.5rem' : 0,
+            initial={{ height: 'auto', opacity: 1, marginBottom: '0.5rem', overflow: 'visible' }}
+            animate={showTopBar ? { 
+              height: 'auto', 
+              opacity: 1, 
+              marginBottom: '0.5rem',
+              overflow: 'hidden',
+              transitionEnd: { overflow: 'visible' }
+            } : { 
+              height: 0, 
+              opacity: 0,
+              marginBottom: 0,
+              overflow: 'hidden'
             }}
             transition={{ duration: 0.3 }}
-            className={`w-full justify-between items-center flex z-102 pointer-events-auto overflow-hidden`}
+            className={`w-full justify-between items-center flex z-102 pointer-events-auto`}
           >
             <Link to="/" className=" flex justify-center items-center">
-              <div className={` ${isScrolled || !isHomepage ? 'text-primary' : 'text-white'} font-geist text-xl sm:text-2xl flex lg:flex font-extrabold pointer-events-auto`}>
+              <div className={` ${isScrolled || !isHomepage ? 'text-black' : 'text-white'} font-geist text-xl sm:text-2xl flex lg:flex font-extrabold pointer-events-auto`}>
                 CarDealership
               </div>
             </Link>
@@ -154,7 +164,7 @@ const MergedNav = () => {
           </motion.div>
           
           <div className="flex items-center w-full justify-center">
-             <SearchFilters className={`${isHomepage && !isScrolled ? 'hidden' : ''}`} />
+             {showSearch && <SearchFilters className={`${isHomepage && !isScrolled ? 'hidden' : ''}`} />}
           </div>
         </div>
       </motion.header>

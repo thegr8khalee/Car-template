@@ -32,6 +32,7 @@ import NewBroadcastPage from './pages/newBroadcast';
 import Makes from './pages/Makes';
 import MergedNavbar from './components/MergedNav';
 import Categories from './pages/Categories';
+import EmailVerificationSentPage from './pages/EmailVerificationSentPage';
 
 function App() {
   const { checkAuth, authUser } = useUserAuthStore();
@@ -58,6 +59,7 @@ function App() {
             path="/signup"
             element={!authUser ? <SignupPage /> : <Navigate to={'/'} />}
           />
+          <Route path="/verify-email-sent" element={<EmailVerificationSentPage />} />
           <Route
             path="/profile"
             element={authUser ? <ProfilePage /> : <LoginPage />}
