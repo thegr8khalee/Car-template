@@ -149,7 +149,7 @@ const Listings = () => {
   };
 
   return (
-    <div className="pt-30 font-inter bg-base-200">
+    <div className="pt-30 min-h-screen font-inter bg-base-200">
       <div id="mobile" className="w-full">
         {/* <section className="w-full bg-secondary pt-16 px-4 h-40 sticky top-0 z-50">
           <hr className="border-t border-gray-500" />

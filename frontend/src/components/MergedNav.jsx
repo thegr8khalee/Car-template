@@ -107,8 +107,8 @@ const MergedNav = () => {
                           <motion.div className="fixed inset-0 z-[70] bg-black/30" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsProfileMenuOpen(false)} />
                           <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.15 }} className="absolute right-0 top-12 w-72 bg-white rounded-3xl shadow-3xl border border-gray-100 p-5 z-[80]">
                             <div className="flex flex-col gap-2">
-                              <button type="button" className="w-full py-2 border-2 border-primary text-primary font-semibold rounded-full text-sm hover:bg-primary/5">Log In</button>
-                              <button type="button" className="w-full py-2 border-2 border-primary text-primary font-semibold rounded-full text-sm hover:bg-primary/5">Sign Up</button>
+                              <Link to="/profile" className="block text-center w-full py-2 border-2 border-primary text-primary font-semibold rounded-full text-sm hover:bg-primary/5">Log In</Link>
+                              <Link to="/signup" className="block text-center w-full py-2 border-2 border-primary text-primary font-semibold rounded-full text-sm hover:bg-primary/5">Sign Up</Link>
                             </div>
                           </motion.div>
                         </>
@@ -121,12 +121,12 @@ const MergedNav = () => {
                           <motion.div className="fixed inset-0 z-[70] bg-black/30" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsMenuOpen(false)} />
                           <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.15 }} className="absolute right-0 top-12 w-72 bg-white rounded-3xl shadow-3xl border border-gray-100 p-4 z-[80]">
                             <div className="flex flex-col gap-1">
-                              <button type="button" className="w-full flex space-x-2 items-center justify-start text-start py-4 border-none hover:bg-primary/10 rounded-full text-sm px-2"> <PiCar className='text-primary size-5 mr-2' /> Listings</button>
-                              <button type="button" className="w-full flex space-x-2 items-center justify-start text-start py-4 border-none hover:bg-primary/10 rounded-full text-sm px-2"> <PiSteeringWheel className='text-primary size-5 mr-2' /> Makes</button>
-                              <button type="button" className="w-full flex space-x-2 items-center justify-start text-start py-4 border-none hover:bg-primary/10 rounded-full text-sm px-2"> <PiGridFour className='text-primary size-5 mr-2' /> Categories</button>
-                              <button type="button" className="w-full flex space-x-2 items-center justify-start text-start py-4 border-none hover:bg-primary/10 rounded-full text-sm px-2"> <PiInfo className='text-primary size-5 mr-2' /> About US</button>
-                              <button type="button" className="w-full flex space-x-2 items-center justify-start text-start py-4 border-none hover:bg-primary/10 rounded-full text-sm px-2"> <PiPhone className='text-primary size-5 mr-2' /> Contact</button>
-                              <button type="button" className="w-full flex space-x-2 items-center justify-start text-start py-4 border-none hover:bg-primary/10 rounded-full text-sm px-2"> <PiShield className='text-primary size-5 mr-2' /> Privacy Policy</button>
+                              <Link to="/listings" className="w-full flex space-x-2 items-center justify-start text-start py-4 border-none hover:bg-primary/10 rounded-full text-sm px-2"> <PiCar className='text-primary size-5 mr-2' /> Listings</Link>
+                              <Link to="/makes" className="w-full flex space-x-2 items-center justify-start text-start py-4 border-none hover:bg-primary/10 rounded-full text-sm px-2"> <PiSteeringWheel className='text-primary size-5 mr-2' /> Makes</Link>
+                              <Link to="/categories" className="w-full flex space-x-2 items-center justify-start text-start py-4 border-none hover:bg-primary/10 rounded-full text-sm px-2"> <PiGridFour className='text-primary size-5 mr-2' /> Categories</Link>
+                              <Link to="/contact" className="w-full flex space-x-2 items-center justify-start text-start py-4 border-none hover:bg-primary/10 rounded-full text-sm px-2"> <PiInfo className='text-primary size-5 mr-2' /> About US</Link>
+                              <Link to="/contact" className="w-full flex space-x-2 items-center justify-start text-start py-4 border-none hover:bg-primary/10 rounded-full text-sm px-2"> <PiPhone className='text-primary size-5 mr-2' /> Contact</Link>
+                              <Link to="/" className="w-full flex space-x-2 items-center justify-start text-start py-4 border-none hover:bg-primary/10 rounded-full text-sm px-2"> <PiShield className='text-primary size-5 mr-2' /> Privacy Policy</Link>
 
                             </div>
                           </motion.div>
@@ -142,8 +142,8 @@ const MergedNav = () => {
                           <motion.div className="fixed inset-0 z-[70] bg-black/30" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsAccountMenuOpen(false)} />
                           <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.15 }} className="absolute right-0 top-12 w-72 bg-white rounded-3xl shadow-3xl border border-gray-100 p-5 z-[80]">
                             <div className="flex flex-col gap-2">
-                              <button type="button" className="w-full py-2 border-2 border-primary text-primary font-semibold rounded-full text-sm hover:bg-primary/5">Log In</button>
-                              <button type="button" className="w-full py-2 border-2 border-primary text-primary font-semibold rounded-full text-sm hover:bg-primary/5">Sign Up</button>
+                              <Link to="/profile" className="block text-center w-full py-2 border-2 border-primary text-primary font-semibold rounded-full text-sm hover:bg-primary/5">Log In</Link>
+                              <Link to="/signup" className="block text-center w-full py-2 border-2 border-primary text-primary font-semibold rounded-full text-sm hover:bg-primary/5">Sign Up</Link>
                             </div>
                           </motion.div>
                         </>

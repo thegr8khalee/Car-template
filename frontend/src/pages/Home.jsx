@@ -206,12 +206,12 @@ const Home = () => {
               A curated collection of world-class luxury and performance
               vehicles—where prestige meets precision.
             </p>
-            <button className="btn btn-lg p-6 btn-primary rounded-full">
+            <Link to="/listings" className="btn btn-lg p-6 btn-primary rounded-full">
               Browse Inventory{' '}
-            </button>
-            <button className="btn btn-lg p-6 ml-4 rounded-full btn-secondary">
+            </Link>
+            <Link to="/contact" className="btn btn-lg p-6 ml-4 rounded-full btn-secondary">
               Contact Us
-            </button>
+            </Link>
           </div>
 
           {/* Bottom Content */}
@@ -239,12 +239,12 @@ const Home = () => {
                 A curated collection of world-class luxury and performance
                 vehicles—where prestige meets precision.
               </p>
-              <button className="btn btn-lg p-6 btn-primary rounded-full">
+              <Link to="/listings" className="btn btn-lg p-6 btn-primary rounded-full">
                 Browse Inventory{' '}
-              </button>
-              <button className="btn btn-lg p-6 ml-4 rounded-full btn-secondary">
+              </Link>
+              <Link to="/contact" className="btn btn-lg p-6 ml-4 rounded-full btn-secondary">
                 Contact Us
-              </button>
+              </Link>
             </div>
           </div>
 
@@ -256,9 +256,9 @@ const Home = () => {
         <section id="top makes" className="w-full max-w-7xl mx-auto py-8 px-4">
           <div className="flex justify-between items-end mb-4">
             <h1 className="text-3xl font-medium font-inter mb-2">Top Makes</h1>
-            <button className="hidden sm:block btn btn-primary rounded-full">
+            <Link to="/makes" className="hidden sm:block btn btn-primary rounded-full">
               View all
-            </button>
+            </Link>
           </div>
 
           <div className="md:hidden grid grid-cols-2 gap-2">
@@ -277,9 +277,9 @@ const Home = () => {
             <MakeCard img={honda1} label="Honda" />
           </div>
           <div className="mt-4 w-full flex justify-end">
-            <button className="sm:hidden btn btn-primary rounded-full">
+            <Link to="/makes" className="sm:hidden btn btn-primary rounded-full">
               View all
-            </button>
+            </Link>
           </div>
         </section>
         <section id="top listings" className="bg-gray-200 w-full py-12 pr-0">
@@ -343,9 +343,9 @@ const Home = () => {
             <h1 className="text-3xl font-medium font-inter mb-2">
               Top Categories
             </h1>
-            <button className="hidden sm:block btn btn-primary rounded-full">
+            <Link to="/categories" className="hidden sm:block btn btn-primary rounded-full">
               View all
-            </button>
+            </Link>
           </div>
 
           <div className="md:hidden grid grid-cols-2 gap-2">
@@ -364,9 +364,9 @@ const Home = () => {
             <CategoryCard img={suv1} label="SUV" />
           </div>
           <div className="mt-4 w-full flex justify-end">
-            <button className="sm:hidden btn btn-primary rounded-full">
+            <Link to="/categories" className="sm:hidden btn btn-primary rounded-full">
               View all
-            </button>
+            </Link>
           </div>
         </section>
         <section
