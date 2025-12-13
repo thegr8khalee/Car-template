@@ -55,7 +55,7 @@ const Contact = () => {
       : null;
 
   return (
-    <div className=" pt-26 font-inter min-h-screen items-center justify-center">
+    <div className=" pt-35 font-inter min-h-screen items-center justify-center">
       {/* <section className="w-full bg-secondary pt-16 px-4 h-16 sticky top-0 z-50"></section> */}
       <div className="min-h-screen w-full max-w-7xl mx-auto flex items-center justify-center flex-col">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">

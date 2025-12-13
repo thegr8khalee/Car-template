@@ -1,5 +1,5 @@
 import Car from '../models/car.model.js';
-import { Op } from 'sequelize';
+import { Op, Sequelize } from 'sequelize';
 import Review from '../models/review.model.js';
 
 export const getAllCars = async (req, res) => {
@@ -183,11 +183,14 @@ export const Search = async (req, res) => {
       const yearQuery = isYear ? parseInt(searchQuery, 10) : null;
 
       const textSearchConditions = [
-        { make: { [Op.like]: `%${searchQuery}%` } },
-        { model: { [Op.like]: `%${searchQuery}%` } },
-        { description: { [Op.like]: `%${searchQuery}%` } },
-        { color: { [Op.like]: `%${searchQuery}%` } },
-        { category: { [Op.like]: `%${searchQuery}%` } },
+        { make: { [Op.iLike]: `%${searchQuery}%` } },
+        { model: { [Op.iLike]: `%${searchQuery}%` } },
+        { description: { [Op.iLike]: `%${searchQuery}%` } },
+        { color: { [Op.iLike]: `%${searchQuery}%` } },
+        Sequelize.where(
+          Sequelize.cast(Sequelize.col('Car.category'), 'text'),
+          { [Op.iLike]: `%${searchQuery}%` }
+        ),
       ];
 
       if (isYear) {
@@ -204,19 +207,19 @@ export const Search = async (req, res) => {
       if (maxPrice) whereClause.price[Op.lte] = parseInt(maxPrice);
     }
     if (condition) {
-      const conditions = condition.split(',').map((c) => c.trim());
+      const conditions = condition.split(',').map((c) => c.trim().toLowerCase());
       whereClause.condition = { [Op.in]: conditions };
     }
     if (bodyType) {
-      const bodyTypes = bodyType.split(',').map((bt) => bt.trim());
+      const bodyTypes = bodyType.split(',').map((bt) => bt.trim().toLowerCase());
       whereClause.bodyType = { [Op.in]: bodyTypes };
     }
     if (fuelType) {
-      const fuelTypes = fuelType.split(',').map((ft) => ft.trim());
+      const fuelTypes = fuelType.split(',').map((ft) => ft.trim().toLowerCase());
       whereClause.fuelType = { [Op.in]: fuelTypes };
     }
     if (make) {
-      const makes = make.split(',').map((m) => m.trim().toLowerCase());
+      const makes = make.split(',').map((m) => m.trim());
       whereClause.make = { [Op.in]: makes };
     }
     if (year) {
@@ -224,17 +227,17 @@ export const Search = async (req, res) => {
       whereClause.year = { [Op.in]: years };
     }
     if (transmission) {
-      const transmissions = transmission.split(',').map((t) => t.trim());
+      const transmissions = transmission.split(',').map((t) => t.trim().toLowerCase());
       whereClause.transmission = { [Op.in]: transmissions };
     }
     if (drivetrain) {
-      const drivetrains = drivetrain.split(',').map((d) => d.trim());
+      const drivetrains = drivetrain.split(',').map((d) => d.trim().toLowerCase());
       whereClause.drivetrain = { [Op.in]: drivetrains };
     }
     if (category) {
       const categories = category
         .split(',')
-        .map((c) => c.trim())
+        .map((c) => c.trim().toLowerCase())
         .filter(Boolean);
       if (categories.length > 0) {
         whereClause.category = { [Op.in]: categories };

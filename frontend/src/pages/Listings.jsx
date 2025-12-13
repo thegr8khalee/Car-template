@@ -19,30 +19,26 @@ const Listings = () => {
     cars,
     isLoading,
     getCars,
+    search,
     pagination,
     searchResults,
     clearSearchResults,
+    isSearching,
   } = useCarStore();
 
   console.log(searchResults);
 
   useEffect(() => {
-    // Check if we navigated here with a body type filter
     const navigationState = location.state;
 
-    if (navigationState?.bodyType) {
-      // Call getCars with the body type filter
-      getCars({ bodyType: navigationState.bodyType });
-    } else if (navigationState?.category) {
-      getCars({ category: navigationState.category });
-    } else if (navigationState?.make) {
-      // Call getCars with the make filter
-      getCars({ make: navigationState.make });
+    if (navigationState && Object.keys(navigationState).length > 0) {
+      // If we have any filters from MergedNav, use the search endpoint
+      search(navigationState);
     } else {
       // Only fetch all cars if no search results and no body type filter
       getCars();
     }
-  }, [getCars, location.state]);
+  }, [getCars, search, location.state]);
 
   // Format as currency
   const formatPrice = (price) =>
@@ -54,16 +50,12 @@ const Listings = () => {
     }).format(price);
 
   const handlePageChange = (page) => {
-    // Preserve body type filter when paginating
-    const params = { page };
-    if (location.state?.bodyType) {
-      params.bodyType = location.state.bodyType;
-    } else if (location.state?.category) {
-      params.category = location.state.category;
-    } else if (location.state?.make) {
-      params.make = location.state.make;
+    const params = { page, ...location.state };
+    if (location.state && Object.keys(location.state).length > 0) {
+      search(params);
+    } else {
+      getCars(params);
     }
-    getCars(params);
   };
 
   // Clear navigation-applied filter and show all cars
@@ -75,7 +67,7 @@ const Listings = () => {
     getCars();
   };
 
-  if (isLoading) {
+  if (isLoading || isSearching) {
     return (
       <div className="flex justify-center items-center h-96">
         <Loader2 className="animate-spin text-primary" />
@@ -157,7 +149,7 @@ const Listings = () => {
   };
 
   return (
-    <div className="pt-26 font-inter bg-base-200">
+    <div className="pt-30 font-inter bg-base-200">
       <div id="mobile" className="w-full">
         {/* <section className="w-full bg-secondary pt-16 px-4 h-40 sticky top-0 z-50">
           <hr className="border-t border-gray-500" />

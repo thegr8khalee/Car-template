@@ -181,7 +181,7 @@ const BlogDetail = () => {
   }
 
   return (
-    <div className="pt-16 font-inter bg-base-200 min-h-screen">
+    <div className="pt-35 font-inter bg-base-200 min-h-screen">
       {/* Sticky Header */}
       {/* <section className="w-full bg-secondary pt-16 px-4 h-16 sticky top-0 z-50 shadow-sm"></section> */}
 

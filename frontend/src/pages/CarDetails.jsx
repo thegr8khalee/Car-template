@@ -286,7 +286,7 @@ const CarDetails = () => {
   }
 
   return (
-    <div className="pt-20 font-inter bg-base-200">
+    <div className="pt-35 font-inter bg-base-200">
       <div id="main-content mobile" className="sm:hidden w-full">
         {/* <div className="bg-secondary h-16 w-full sticky top-0 z-50"></div> */}
         <div className="w-full max-w-7xl mx-auto px-4 mt-2">

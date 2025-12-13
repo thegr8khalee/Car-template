@@ -30,7 +30,7 @@ body {
 
 @font-face {
   font-family: 'Microgramma D Extended';
-  src: url('/src/assets/LogoFont.otf') format('truetype');
+  src: url('/fonts/LogoFont.otf') format('opentype');
   font-weight: normal;
   font-style: normal;
 }

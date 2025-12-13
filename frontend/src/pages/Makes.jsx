@@ -83,7 +83,7 @@ const Makes = () => {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="w-full bg-gradient-to-b from-gray-50 to-white pt-26">
+      <section className="w-full bg-gradient-to-b from-gray-50 to-white pt-35">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

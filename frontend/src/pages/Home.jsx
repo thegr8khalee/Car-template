@@ -6,6 +6,7 @@ import { FaCheckCircle } from 'react-icons/fa';
 import {
   ArrowRight,
   ArrowUpRight,
+  Check,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
@@ -16,6 +17,7 @@ import {
   Star,
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import SearchFilters from '../components/SearchFilters';
 import CarCard from '../components/CarCard';
 import TeamCard from '../components/TeamCard';
 import BlogCard from '../components/BlogCard';
@@ -54,6 +56,7 @@ import {
   comfort,
   sport1,
   suv1,
+  hero,
 } from '../config/images';
 // import CarSearchBar from '../components/Searchbar';
 import { useCarStore } from '../store/useCarStore';
@@ -65,6 +68,7 @@ import MakeCard from '../components/MakeCard';
 import { Datepicker } from 'flowbite-react';
 import Blog from '../components/Blog';
 import CategoryCard from '../components/CategoryCard';
+import HeroSearchBar from '../components/HeroSearchBar';
 
 const Home = () => {
   const [isFocusedCarPrice, setIsFocusedCarPrice] = useState(false);
@@ -186,154 +190,67 @@ const Home = () => {
         <section
           id="hero"
           className="relative lg:hidden w-full h-screen bg-cover bg-center flex flex-col justify-between p-4"
-          style={{ backgroundImage: `url(${Heromobile})` }}
+          style={{
+            backgroundImage: `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url(${hero})`,
+          }}
         >
           {/* Middle Content */}
           <div className="relative pt-25 z-10 text-white text-left">
-            <h1 className="text-2xl font-medium font-inter drop-shadow-lg">
-              Lamborghini
-            </h1>
+            {/* <h1 className="text-2xl font-medium font-inter drop-shadow-lg">
+              Drive the Standard of Excellence
+            </h1> */}
             <h1 className="text-5xl font-bold font-inter drop-shadow-lg">
-              Aventador 2020
+              Drive the Standard of Excellence
             </h1>
-            <p className="text-xs mt-2 max-w-xs">
-              Experience the thrill of the 2020 Aventador. Unmatched
-              performance, breathtaking design, and pure adrenaline.
+            <p className="text-xs mt-2 max-w-sm mb-4">
+              A curated collection of world-class luxury and performance
+              vehicles—where prestige meets precision.
             </p>
+            <button className="btn btn-lg p-6 btn-primary rounded-full">
+              Browse Inventory{' '}
+            </button>
+            <button className="btn btn-lg p-6 ml-4 rounded-full btn-secondary">
+              Contact Us
+            </button>
           </div>
 
           {/* Bottom Content */}
           <div className="relative z-10 w-full">
-            <div className="bg-white/3 backdrop-blur-sm rounded-none p-1 flex justify-around items-center text-white text-xs mb-2">
-              <div className="flex items-center space-x-2 p-2">
-                <img src={mileage} alt="mileage" className="w-5 h-5 invert" />
-                <span className="text-lg">2,000km</span>
-              </div>
-              <div className="flex items-center space-x-2 p-2">
-                <img
-                  src={transmission}
-                  alt="transmission"
-                  className="w-5 h-5 invert"
-                />
-                <span className="text-lg">Auto</span>
-              </div>
-              <div className="flex items-center space-x-2 p-2">
-                <img src={gas} alt="fuel" className="w-5 h-5 invert" />
-                <span className="text-lg">Gas</span>
-              </div>
-              <div className="hidden items-center space-x-2 p-2">
-                <img src={engine} alt="engine" className="w-5 h-5" />
-                <span>6.5L V12</span>
-              </div>
-            </div>
-            <div className="bg-white/3 backdrop-blur-sm rounded-none p-3">
-              <div className="flex justify-between items-center">
-                <div className="text-white">
-                  <span className="text-sm text-gray-400">Price</span>
-                  <p className="font-bold text-2xl">N500M</p>
-                </div>
-                <div className="h-10 border-l border-white/50"></div>
-                <div className="text-white text-center">
-                  <span className="text-sm text-gray-400">Engine</span>
-                  <p className="font-bold text-lg">6.5L V12</p>
-                </div>
-                <div className="h-10 border-l border-white/50"></div>
-                <div className="text-white text-center">
-                  <span className="text-sm text-gray-400">Year</span>
-                  <p className="font-bold text-lg">2020</p>
-                </div>
-              </div>
-              <div className="flex flex-col sm:flex-row sm:space-x-2 space-y-2 mt-3">
-                <button className="btn btn-secondary sm:flex-1 rounded-none">
-                  View Details
-                </button>
-                <button className="btn btn-primary sm:flex-1 rounded-none">
-                  Browse Cars
-                </button>
-              </div>
-            </div>
+            <HeroSearchBar />
           </div>
         </section>
         <section
           id="desktop hero"
           className="relative hidden w-full h-screen bg-cover bg-center lg:flex flex-col justify-between p-12"
-          style={{ backgroundImage: `url(${Heromobile})` }}
+          style={{
+            backgroundImage: `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url(${hero})`,
+          }}
         >
           {/* Middle Content - Hero Text */}
           <div className="pt-25 relative z-10 w-full max-w-7xl mx-auto text-white">
             <div className="max-w-2xl">
-              <h2 className="text-4xl font-medium font-inter drop-shadow-lg">
+              {/* <h2 className="text-4xl font-medium font-inter drop-shadow-lg">
                 Lamborghini
-              </h2>
+              </h2> */}
               <h1 className="text-7xl font-bold font-inter drop-shadow-lg">
-                Aventador 2020
+                Drive the Standard of Excellence
               </h1>
-              <p className="text-base mt-4 max-w-lg">
-                Experience the thrill of the 2020 Aventador. Unmatched
-                performance, breathtaking design, and pure adrenaline await.
-                Discover the legend.
+              <p className="text-base mt-4 max-w-lg mb-4">
+                A curated collection of world-class luxury and performance
+                vehicles—where prestige meets precision.
               </p>
+              <button className="btn btn-lg p-6 btn-primary rounded-full">
+                Browse Inventory{' '}
+              </button>
+              <button className="btn btn-lg p-6 ml-4 rounded-full btn-secondary">
+                Contact Us
+              </button>
             </div>
           </div>
 
-          {/* Bottom Content - Details Card */}
-          <div className="relative z-10 w-full max-w-7xl mx-auto">
-            <div className="bg-white/2 backdrop-blur-sm rounded-none p-6 flex items-center justify-between">
-              {/* Price */}
-              <div className="text-white">
-                <span className="text-sm text-gray-400">Price</span>
-                <p className="font-bold text-4xl">N500M</p>
-              </div>
-              <div className="h-16 border-l border-white/30"></div>
-
-              {/* Specs */}
-              <div className="flex items-center space-x-8 text-white">
-                <div className="flex items-center space-x-3">
-                  {/* <img
-                    src={mileage}
-                    alt="mileage"
-                    className="w-8 h-8 filter invert"
-                  /> */}
-                  <div>
-                    <span className="text-xs text-gray-400">Mileage</span>
-                    <p className="font-semibold text-lg">2,000 km</p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-3">
-                  {/* <img
-                    src={transmission}
-                    alt="transmission"
-                    className="w-8 h-8 filter invert"
-                  /> */}
-                  <div>
-                    <span className="text-xs text-gray-400">Transmission</span>
-                    <p className="font-semibold text-lg">Automatic</p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-3">
-                  {/* <img
-                    src={engine}
-                    alt="engine"
-                    className="w-8 h-8 filter invert"
-                  /> */}
-                  <div>
-                    <span className="text-xs text-gray-400">Engine</span>
-                    <p className="font-semibold text-lg">6.5L V12</p>
-                  </div>
-                </div>
-              </div>
-              <div className="h-16 border-l border-white/30"></div>
-
-              {/* Buttons */}
-              <div className="flex space-x-4">
-                <button className="btn btn-secondary btn-lg rounded-none px-8">
-                  View Details
-                </button>
-                <button className="btn btn-primary btn-lg rounded-none px-8">
-                  Browse Cars
-                </button>
-              </div>
-            </div>
+          {/* Bottom Content - Search Bar */}
+          <div className="relative z-10 w-full max-w-7xl mx-auto flex justify-center">
+            <HeroSearchBar />
           </div>
         </section>
         <section id="top makes" className="w-full max-w-7xl mx-auto py-8 px-4">
@@ -456,18 +373,28 @@ const Home = () => {
           id="form"
           className="w-full py-25 px-4 h-full"
           style={{
-            backgroundImage: `url(${Hero})`,
+            backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(${hero})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
           }}
         >
           <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-start md:justify-between items-center justify-center">
-            <h1 className="text-5xl font-medium font-inter mb-2 text-white">
-              Request VIP Showing
-            </h1>
+            <div className="max-w-lg text-white">
+              <h1 className="text-5xl font-medium font-inter mb-2 text-white">
+                Schedule a VIP Showing
+              </h1>
+              <p className="mb-2">Step into a concierge-level car buying experience. From arrival to final inspection, every detail is handled with precision, privacy, and class.</p>
+              <ul>
+                <li className='flex items-center space-x-2'><Check className='text-primary size-5' /> Appointment-only access</li>
+                <li className='flex items-center space-x-2'><Check className='text-primary size-5' />Personalized vehicle walkthroughs</li>
+                <li className='flex items-center space-x-2'><Check className='text-primary size-5' />Test drives at your convenience</li>
+                <li className='flex items-center space-x-2'><Check className='text-primary size-5' />Dedicated sales consultant</li>
+              </ul>
+            </div>
+
             <form
               action=""
-              className="mt-4 md:mt-0 border border-white/50 max-w-md my-auto bg-white/10 p-4 py-6 backdrop-blur-sm"
+              className="mt-4 md:mt-0 border border-white/30 max-w-md my-auto bg-white/10 p-4 py-6 backdrop-blur-sm rounded-2xl"
             >
               <h1 className="text-2xl font-medium font-inter mb-2 text-white">
                 Contact Information
@@ -475,30 +402,30 @@ const Home = () => {
               <input
                 type="text"
                 placeholder="Enter your name"
-                className="input input-bordered border-white/50 rounded-none bg-transparent text-white  w-full mb-4"
+                className="input input-bordered border-white/30 rounded-xl bg-transparent text-white  w-full mb-4"
               />
               <input
                 type="email"
                 placeholder="Enter your email"
-                className="input input-bordered border-white/50 rounded-none bg-transparent text-white  w-full mb-4"
+                className="input input-bordered border-white/30 rounded-xl bg-transparent text-white  w-full mb-4"
               />
               <input
                 type="tel"
                 placeholder="Enter your phone number"
-                className="input input-bordered border-white/50 rounded-none bg-transparent text-white placeholder:text-gray-400 w-full mb-4"
+                className="input input-bordered border-white/30 rounded-xl bg-transparent text-white placeholder:text-gray-400 w-full mb-4"
               />
               <input
                 type="date"
                 placeholder="Preferred Date"
-                className="input input-bordered border-white/50 rounded-none bg-transparent text-white placeholder:text-gray-400 w-full mb-4"
+                className="input input-bordered border-white/30 rounded-xl bg-transparent text-white placeholder:text-gray-400 w-full mb-4"
               />
               <textarea
                 placeholder="Enter your message"
-                className="textarea textarea-bordered border-white/50 rounded-none bg-transparent text-white placeholder:text-gray-400 w-full mb-4"
+                className="textarea textarea-bordered border-white/30 rounded-xl bg-transparent text-white placeholder:text-gray-400 w-full mb-4"
               ></textarea>
               <button
                 type="submit"
-                className="btn btn-primary w-full rounded-none"
+                className="btn btn-primary w-full rounded-xl"
               >
                 Submit
               </button>
@@ -598,62 +525,7 @@ const Home = () => {
 
           {/* Bottom Content - Details Card */}
           <div className="relative z-10 w-full max-w-7xl mx-auto">
-            <div className="bg-white/2 backdrop-blur-sm rounded-none p-6 flex items-center justify-between">
-              {/* Price */}
-              <div className="text-white">
-                <span className="text-sm text-gray-400">Price</span>
-                <p className="font-bold text-4xl">N500M</p>
-              </div>
-              <div className="h-16 border-l border-white/30"></div>
-
-              {/* Specs */}
-              <div className="flex items-center space-x-8 text-white">
-                <div className="flex items-center space-x-3">
-                  {/* <img
-                    src={mileage}
-                    alt="mileage"
-                    className="w-8 h-8 filter invert"
-                  /> */}
-                  <div>
-                    <span className="text-xs text-gray-400">Mileage</span>
-                    <p className="font-semibold text-lg">2,000 km</p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-3">
-                  {/* <img
-                    src={transmission}
-                    alt="transmission"
-                    className="w-8 h-8 filter invert"
-                  /> */}
-                  <div>
-                    <span className="text-xs text-gray-400">Transmission</span>
-                    <p className="font-semibold text-lg">Automatic</p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-3">
-                  {/* <img
-                    src={engine}
-                    alt="engine"
-                    className="w-8 h-8 filter invert"
-                  /> */}
-                  <div>
-                    <span className="text-xs text-gray-400">Engine</span>
-                    <p className="font-semibold text-lg">6.5L V12</p>
-                  </div>
-                </div>
-              </div>
-              <div className="h-16 border-l border-white/30"></div>
-
-              {/* Buttons */}
-              <div className="flex space-x-4">
-                <button className="btn btn-secondary btn-lg rounded-none px-8">
-                  View Details
-                </button>
-                <button className="btn btn-primary btn-lg rounded-none px-8">
-                  Browse Cars
-                </button>
-              </div>
-            </div>
+            {/* <HeroSearchBar /> */}
           </div>
         </section>
 

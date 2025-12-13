@@ -51,5 +51,6 @@ export const comfort = `${IMAGE_BASE_PATH}/comfort.webp`;
 export const ev = `${IMAGE_BASE_PATH}/ev.webp`;
 export const budget = `${IMAGE_BASE_PATH}/budget.webp`;
 export const pickup1 = `${IMAGE_BASE_PATH}/pickup.webp`;
+export const hero = `${IMAGE_BASE_PATH}/hero.webp`
 
 export const imagePath = (fileName = '') => `${IMAGE_BASE_PATH}/${fileName}`;
