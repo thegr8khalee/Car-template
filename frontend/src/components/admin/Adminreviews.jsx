@@ -1,5 +1,6 @@
 // AdminReviews.jsx
 import React, { useEffect, useState } from 'react';
+import Skeleton from '../Skeleton';
 import { useDashboardStore } from '../../store/useDasboardStore';
 import {
   Star,
@@ -44,7 +45,13 @@ const AdminReviews = () => {
   };
 
   if (isFetchingReviews && !reviewsStats) {
-    return <div className="text-center py-8">Loading...</div>;
+    return (
+      <div className="space-y-2">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <Skeleton key={i} height={60} className="w-full" />
+        ))}
+      </div>
+    );
   }
 
   if (reviewError && !reviewsStats) {

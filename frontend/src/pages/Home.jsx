@@ -157,6 +157,10 @@ const Home = () => {
     navigate('/listings');
   };
 
+  const handleBlogsClick = () => {
+    navigate('/blogs');
+  };
+
   const bodyTypes = [
     { label: 'SUV', img: suv },
     { label: 'Sedan', img: sedan },
@@ -256,7 +260,7 @@ const Home = () => {
         <section id="top makes" className="w-full max-w-7xl mx-auto py-8 px-4">
           <div className="flex justify-between items-end mb-4">
             <h1 className="text-3xl font-medium font-inter mb-2">Top Makes</h1>
-            <Link to="/makes" className="hidden sm:block btn btn-primary rounded-full">
+            <Link to="/makes" className="hidden sm:flex btn btn-primary rounded-full items-center">
               View all
             </Link>
           </div>
@@ -343,7 +347,7 @@ const Home = () => {
             <h1 className="text-3xl font-medium font-inter mb-2">
               Top Categories
             </h1>
-            <Link to="/categories" className="hidden sm:block btn btn-primary rounded-full">
+            <Link to="/categories" className="hidden sm:flex items-center btn btn-primary rounded-full">
               View all
             </Link>
           </div>
@@ -440,7 +444,7 @@ const Home = () => {
             <h1 className="text-3xl font-medium font-inter">Blog Posts</h1>
             <button
               className="btn hidden sm:block btn-primary rounded-full"
-              onClick={handleListingsClick}
+              onClick={handleBlogsClick}
             >
               View All
             </button>

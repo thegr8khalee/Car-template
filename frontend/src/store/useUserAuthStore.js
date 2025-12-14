@@ -10,9 +10,10 @@ export const useUserAuthStore = create((set, get) => ({
   isRequestingReset: false,
   isResettingPassword: false,
   isChangingPassword: false,
+  authError: null,
 
   checkAuth: async () => {
-    set({ isLoading: true });
+    set({ isLoading: true, authError: null });
     try {
       const res = await axiosInstance.get('/user/auth/check');
 
@@ -29,7 +30,7 @@ export const useUserAuthStore = create((set, get) => ({
   },
 
   signup: async (data) => {
-    set({ isLoading: true });
+    set({ isLoading: true, authError: null });
     try {
       const res = await axiosInstance.post('/user/auth/signup', data);
       if (res.data.emailConfirmationRequired) {
@@ -41,8 +42,10 @@ export const useUserAuthStore = create((set, get) => ({
         return { success: true, emailConfirmationRequired: false };
       }
     } catch (error) {
-      toast.error(error.response.data.message);
-      return { success: false, error: error.response.data.message };
+      const msg = error.response?.data?.message || error.message || 'Signup failed';
+      set({ authError: msg });
+      toast.error(msg);
+      return { success: false, error: msg };
     } finally {
       set({ isLoading: false });
     }
@@ -55,8 +58,12 @@ export const useUserAuthStore = create((set, get) => ({
       const res = await axiosInstance.post('/user/auth/login', data);
       set({ authUser: res.data });
       toast.success('Welcome Back!');
+      return { success: true };
     } catch (error) {
-      toast.error(error.response.data.message);
+      const msg = error?.response?.data?.message || error.message || 'Login failed';
+      set({ authError: msg });
+      toast.error(msg);
+      return { success: false, error: msg };
     } finally {
       set({ isLoading: false });
     }
@@ -105,16 +112,15 @@ export const useUserAuthStore = create((set, get) => ({
    * @param {string} email - The email address for which to reset the password.
    */
   forgotPassword: async (email) => {
-    set({ isRequestingReset: true });
+    set({ isRequestingReset: true, authError: null });
     try {
       const res = await axiosInstance.post('/user/auth/forgot-password', { email });
       toast.success(res.data.message); // Backend should return a generic success message
     } catch (error) {
       console.error('Error in forgotPassword store action:', error);
-      toast.error(
-        error.response?.data?.message ||
-          'Failed to send reset link. Please try again.'
-      );
+      const msg = error.response?.data?.message || 'Failed to send reset link. Please try again.';
+      set({ authError: msg });
+      toast.error(msg);
     } finally {
       set({ isRequestingReset: false });
     }
@@ -126,7 +132,7 @@ export const useUserAuthStore = create((set, get) => ({
    * @param {string} newPassword - The new password for the user.
    */
   resetPassword: async (token, newPassword) => {
-    set({ isResettingPassword: true });
+    set({ isResettingPassword: true, authError: null });
     try {
       const res = await axiosInstance.post(`/user/auth/reset-password/${token}`, {
         newPassword,
@@ -134,10 +140,9 @@ export const useUserAuthStore = create((set, get) => ({
       toast.success(res.data.message);
     } catch (error) {
       console.error('Error in resetPassword store action:', error);
-      toast.error(
-        error.response?.data?.message ||
-          'Failed to reset password. Please try again.'
-      );
+      const msg = error.response?.data?.message || 'Failed to reset password. Please try again.';
+      set({ authError: msg });
+      toast.error(msg);
     } finally {
       set({ isResettingPassword: false });
     }
@@ -149,7 +154,7 @@ export const useUserAuthStore = create((set, get) => ({
    * @param {string} newPassword - The new password for the user.
    */
   changePassword: async (oldPassword, newPassword) => {
-    set({ isChangingPassword: true });
+    set({ isChangingPassword: true, authError: null });
     try {
       const res = await axiosInstance.put('/user/auth/change-password', {
         oldPassword,
@@ -158,10 +163,9 @@ export const useUserAuthStore = create((set, get) => ({
       toast.success(res.data.message);
     } catch (error) {
       console.error('Error in changePassword store action:', error);
-      toast.error(
-        error.response?.data?.message ||
-          'Failed to change password. Please try again.'
-      );
+      const msg = error.response?.data?.message || 'Failed to change password. Please try again.';
+      set({ authError: msg });
+      toast.error(msg);
     } finally {
       set({ isChangingPassword: false });
     }

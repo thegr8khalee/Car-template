@@ -70,6 +70,13 @@ const MergedNav = () => {
     '/signup',
     '/verify-email-sent',
     '/login',
+    '/admin/login',
+    '/admin/dashboard',
+    '/admin/cars/new',
+    '/admin/blogs/new',
+    '/admin/cars/update',
+    '/admin/blogs/update',
+    '/admin/users',
   ];
   const showSearch = !hideSearchRoutes.includes(location.pathname);
 
@@ -88,7 +95,7 @@ const MergedNav = () => {
 
   return (
     <div
-      className={`sticky top-0 w-full z-10 transition-all duration-300 ${
+      className={`sticky top-0 w-full z-20 transition-all duration-300 ${
         isScrolled ? 'bg-gray-200' : 'bg-linear-to-b from-white to-transparent'
       }`}
     >

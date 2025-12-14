@@ -26,6 +26,7 @@ const ProfilePage = () => {
     deleteAccount,
     isChangingPassword,
     changePassword,
+    authError,
   } = useUserAuthStore();
 
   // NEW: From usePasswordStore
@@ -131,6 +132,11 @@ const ProfilePage = () => {
         </h1>
 
         <div className="max-w-2xl mx-auto bg-base-100 p-6 rounded-none shadow-xl">
+          {authError && (
+            <div className="alert alert-error mb-4 text-sm">
+              <span>{authError}</span>
+            </div>
+          )}
           {/* Error and Success messages are now handled by react-hot-toast directly from store actions */}
           {/* {profileUpdateError && (
             <div role="alert" className="alert alert-error mb-4">

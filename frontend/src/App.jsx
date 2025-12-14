@@ -51,7 +51,7 @@ function App() {
     <div className="flex flex-col min-h-screen">
       <ScrollToTop />
       {/* <Navbar className="z-100" /> */}
-      <MergedNavbar className="z-100" />
+      {showFooter && <MergedNavbar className="z-100" />}
       <main className="flex-grow">
         <Routes>
           <Route path="/" element={<Home />} />
@@ -59,7 +59,10 @@ function App() {
             path="/signup"
             element={!authUser ? <SignupPage /> : <Navigate to={'/'} />}
           />
-          <Route path="/verify-email-sent" element={<EmailVerificationSentPage />} />
+          <Route
+            path="/verify-email-sent"
+            element={<EmailVerificationSentPage />}
+          />
           <Route
             path="/profile"
             element={authUser ? <ProfilePage /> : <LoginPage />}
@@ -91,7 +94,7 @@ function App() {
             />
             <Route path="/admin/staff/add" element={<AddStaffPage />} />
             <Route path="/admin/staff/edit/:id" element={<EditStaffPage />} />
-            <Route path='/admin/broadcast/new' element={<NewBroadcastPage />} />
+            <Route path="/admin/broadcast/new" element={<NewBroadcastPage />} />
           </Route>
         </Routes>
 

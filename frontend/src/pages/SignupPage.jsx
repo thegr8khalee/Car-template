@@ -19,7 +19,7 @@ const SignupPage = () => {
   const navigate = useNavigate();
 
   // Access authUser and isAdmin from the store to handle redirection if already logged in as admin
-  const { signup, isLoading } = useUserAuthStore();
+  const { signup, isLoading, authError } = useUserAuthStore();
   // Effect to redirect if an admin is already logged in
   // This handles cases where an admin manually navigates to /admin/login while already authenticated
 
@@ -49,6 +49,11 @@ const SignupPage = () => {
               Welcome to Company Name
             </h2>
             <p>Please fill in the details below to create an account.</p>
+            {authError && (
+              <div className="alert alert-error mt-4 text-sm">
+                <span>{authError}</span>
+              </div>
+            )}
 
             <form onSubmit={handleSubmit}>
               <div className="relative w-full mb-4">

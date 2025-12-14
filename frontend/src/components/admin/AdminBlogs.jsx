@@ -1,5 +1,6 @@
 // AdminBlogs.jsx
 import React, { useEffect } from 'react';
+import Skeleton from '../Skeleton';
 import { useDashboardStore } from '../../store/useDasboardStore';
 import { ChevronDown, ChevronLeft, User, Calendar, Eye } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -26,7 +27,15 @@ const AdminBlogs = () => {
     getBlogs(params);
   };
 
-  if (isFetchingBlogs) return <div>Loading...</div>;
+  if (isFetchingBlogs) {
+    return (
+      <div className="space-y-2">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <Skeleton key={i} height={60} className="w-full" />
+        ))}
+      </div>
+    );
+  }
   if (blogError) return <div>Error: {blogError}</div>;
   if (blogs?.length === 0) return <div>No blogs found.</div>;
 

@@ -105,16 +105,16 @@ export const getDashboardStats = async (req, res) => {
     );
     const sellingToUsTotal = await SellNow.count();
     const SellingToUsPending = await SellNow.count({
-      where: { OfferStatus: 'Pending' },
+      where: { offerStatus: 'Pending' },
     });
     const SellingToUsOfferSent = await SellNow.count({
-      where: { OfferStatus: 'Offer Sent' },
+      where: { offerStatus: 'Offer Sent' },
     });
     const SellingToUsAccepted = await SellNow.count({
-      where: { OfferStatus: 'Accepted' },
+      where: { offerStatus: 'Accepted' },
     });
     const SellingToUsRejected = await SellNow.count({
-      where: { OfferStatus: 'Rejected' },
+      where: { offerStatus: 'Rejected' },
     });
 
     // Blog stats
@@ -440,6 +440,7 @@ export const getUserStats = async (req, res) => {
       include: [
         {
           model: Comment,
+          as: 'comments',
           required: true,
           where: {
             createdAt: {
@@ -448,6 +449,7 @@ export const getUserStats = async (req, res) => {
           },
         },
       ],
+      distinct: true,
     });
 
     const thisMonthUsers = await User.count({
@@ -540,9 +542,10 @@ export const getContentModerationStats = async (req, res) => {
 export const getRevenueStats = async (req, res) => {
   try {
     // Monthly revenue trend
+    const monthExpr = literal(`TO_CHAR("updatedAt", 'YYYY-MM')`);
     const monthlyRevenue = await Car.findAll({
       attributes: [
-        [fn('DATE_FORMAT', col('updatedAt'), '%Y-%m'), 'month'],
+        [monthExpr, 'month'],
         [fn('SUM', col('price')), 'revenue'],
         [fn('COUNT', col('id')), 'carsSold'],
       ],
@@ -552,8 +555,8 @@ export const getRevenueStats = async (req, res) => {
           [Op.gte]: new Date(Date.now() - 12 * 30 * 24 * 60 * 60 * 1000),
         },
       },
-      group: [fn('DATE_FORMAT', col('updatedAt'), '%Y-%m')],
-      order: [[fn('DATE_FORMAT', col('updatedAt'), '%Y-%m'), 'ASC']],
+      group: [monthExpr],
+      order: [[monthExpr, 'ASC']],
     });
 
     // Revenue by car make
@@ -679,19 +682,22 @@ export const getTopPerformers = async (req, res) => {
         'make',
         'model',
         'year',
-        [fn('COUNT', col('Reviews.id')), 'reviewCount'],
+        [fn('COUNT', col('reviews.id')), 'reviewCount'],
       ],
       include: [
         {
           model: Review,
+          as: 'reviews',
           attributes: [],
           where: { status: 'approved' },
-          required: true,
+          required: false,
         },
       ],
       group: ['Car.id'],
-      order: [[fn('COUNT', col('Reviews.id')), 'DESC']],
+      having: literal('COUNT("reviews"."id") > 0'),
+      order: [[literal('COUNT("reviews"."id")'), 'DESC']],
       limit: 10,
+      subQuery: false,
     });
 
     // Best selling car makes
@@ -771,12 +777,12 @@ export const getListings = async (req, res) => {
           model: Review,
           as: 'reviews',
           attributes: [
-            // Use Sequelize literal to compute the average rating
+            // Use Sequelize literal to compute the average rating (fully qualified for Postgres)
             [
               fn(
                 'AVG',
                 literal(
-                  '(interiorRating + exteriorRating + comfortRating + performanceRating) / 4'
+                  '(("reviews"."interiorRating" + "reviews"."exteriorRating" + "reviews"."comfortRating" + "reviews"."performanceRating") / 4)'
                 )
               ),
               'averageRating',

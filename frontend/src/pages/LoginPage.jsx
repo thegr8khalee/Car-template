@@ -23,6 +23,7 @@ const LoginPage = () => {
     isAdmin,
     forgotPassword,
     isRequestingReset,
+    authError,
   } = useUserAuthStore(); // Added authUser, isAdmin
   // const { forgotPassword, isRequestingReset } = usePasswordStore(); // NEW: Destructure from usePasswordStore
 
@@ -82,6 +83,11 @@ const LoginPage = () => {
             <p className="text-center text-sm text-gray-500">
               Please enter your credentials to access your account.
             </p>
+            {authError && (
+              <div className="alert alert-error mt-4 text-sm">
+                <span>{authError}</span>
+              </div>
+            )}
 
             {/* Login Form */}
             {!showForgotPasswordForm ? (

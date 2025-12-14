@@ -1,4 +1,5 @@
 import React from 'react';
+import Skeleton from '../components/Skeleton';
 import BlogCard from '../components/BlogCard';
 import { ChevronLeft, Loader2 } from 'lucide-react';
 import { useBlogStore } from '../store/useBlogStore';
@@ -23,8 +24,10 @@ const Blogs = () => {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <Loader2 className="animate-spin text-primary" />
+      <div className="w-full max-w-6xl px-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mx-auto mt-8">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <Skeleton key={i} height={320} className="w-full" />
+        ))}
       </div>
     );
   }

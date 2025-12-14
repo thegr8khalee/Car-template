@@ -1,4 +1,5 @@
 import { ChevronLeft, Loader2 } from 'lucide-react';
+import Skeleton from '../components/Skeleton';
 import { useLocation } from 'react-router-dom'; // Add this import
 import { motion } from 'framer-motion';
 import {
@@ -69,8 +70,10 @@ const Listings = () => {
 
   if (isLoading || isSearching) {
     return (
-      <div className="flex justify-center items-center h-96">
-        <Loader2 className="animate-spin text-primary" />
+      <div className="w-full max-w-6xl px-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mx-auto mt-8">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <Skeleton key={i} height={320} className="w-full" />
+        ))}
       </div>
     );
   }
@@ -116,7 +119,9 @@ const Listings = () => {
       <section id="listings" className="w-full justify-center flex">
         <div className="w-full max-w-6xl px-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {isLoading ? (
-            <p>Loading cars...</p>
+            Array.from({ length: 8 }).map((_, i) => (
+              <Skeleton key={i} height={320} className="w-full" />
+            ))
           ) : (
             carsToRender.map((car, index) => (
               <motion.div

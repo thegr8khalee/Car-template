@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import Skeleton from '../Skeleton';
 import {
   Clock,
   CheckCircle,
@@ -46,7 +47,13 @@ const AdminSellingToUs = () => {
   };
 
   if (isFetchingSellSubmissions && !sellSubmissionsStats) {
-    return <div className="text-center py-8">Loading...</div>;
+    return (
+      <div className="space-y-2">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <Skeleton key={i} height={70} className="w-full" />
+        ))}
+      </div>
+    );
   }
 
   if (sellSubmissionError && !sellSubmissionsStats) {

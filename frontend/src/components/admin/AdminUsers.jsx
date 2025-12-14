@@ -1,5 +1,6 @@
 // AdminUsers.jsx
 import React, { useEffect, useState } from 'react';
+import Skeleton from '../Skeleton';
 import { useDashboardStore } from '../../store/useDasboardStore';
 import {
   ChevronDown,
@@ -38,8 +39,15 @@ const AdminUsers = ({ setActiveSection, setSelectedUser }) => {
     getUsers({ page: 1, limit: 10, search: searchTerm });
   };
 
-  if (isFetchingUsers)
-    return <div className="text-center py-8">Loading...</div>;
+  if (isFetchingUsers) {
+    return (
+      <div className="space-y-2">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <Skeleton key={i} height={60} className="w-full" />
+        ))}
+      </div>
+    );
+  }
   if (userError)
     return (
       <div className="text-center py-8 text-error">Error: {userError}</div>

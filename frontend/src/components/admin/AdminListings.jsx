@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import Skeleton from '../Skeleton';
 import { useDashboardStore } from '../../store/useDasboardStore';
 import { ChevronDown, ChevronUp, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -26,7 +27,15 @@ const AdminListings = () => {
     getListings(params);
   };
 
-  if (isFetchingListings) return <div>Loading...</div>;
+  if (isFetchingListings) {
+    return (
+      <div className="space-y-2">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <Skeleton key={i} height={80} className="w-full" />
+        ))}
+      </div>
+    );
+  }
   if (listingError) return <div>Error: {listingError}</div>;
   if (listings.length === 0) return <div>No listings found.</div>;
   return (

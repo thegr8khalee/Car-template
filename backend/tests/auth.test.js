@@ -84,8 +84,8 @@ describe('Auth Controller', () => {
           phoneNumber: '1234567890',
         });
 
-      expect(res.statusCode).toBe(201);
-      expect(res.body.email).toBe('test@example.com');
+      expect(res.statusCode).toBe(200); // controller returns 200 when email confirmation is required (no session)
+      expect(res.body.emailConfirmationRequired).toBe(true);
       expect(supabase.auth.signUp).toHaveBeenCalled();
       expect(User.create).toHaveBeenCalled();
     });

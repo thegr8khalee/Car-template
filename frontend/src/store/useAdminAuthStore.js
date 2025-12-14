@@ -7,6 +7,7 @@ import { useUserAuthStore } from './useUserAuthStore.js';
 export const useAdminAuthStore = create((set) => ({
   authUser: null,
   isLoading: false,
+  errorMessage: null,
   isSidebarOpen: false, // Initial state: sidebar is closed
 
 
@@ -21,10 +22,10 @@ export const useAdminAuthStore = create((set) => ({
   openSidebar: () => set({ isSidebarOpen: true }),
 
   adminLogin: async (data) => {
-    set({ isLoading: true });
-    console.log('Admin login data:', data); // Add this
+    set({ isLoading: true, errorMessage: null });
+    console.log('Admin login data:', data);
     try {
-      console.log('Sending login request with data:', data); // Add this
+      console.log('Sending login request with data:', data);
       const res = await axiosInstance.post('/admin/auth/login', data);
       console.log('Login response:', res);
       useUserAuthStore.setState({
@@ -32,10 +33,13 @@ export const useAdminAuthStore = create((set) => ({
         isAdmin: ['super_admin', 'editor', 'moderator'].includes(res.data?.role),
       });
       toast.success('Logged in successfully');
+      return { success: true };
     } catch (error) {
-      console.error('Login error:', error); // Add this
-      console.error('Error response:', error.response); // Add this
-      toast.error(error.message);
+      const msg = error?.response?.data?.message || error.message || 'Login failed';
+      console.error('Login error:', msg, error?.response?.data);
+      set({ errorMessage: msg });
+      toast.error(msg);
+      return { success: false, error: msg };
     } finally {
       set({ isLoading: false });
     }

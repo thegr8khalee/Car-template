@@ -16,7 +16,7 @@ const AdminLoginPage = () => {
 
   // Access authUser and isAdmin from the store to handle redirection if already logged in as admin
   const { authUser, isAdmin, isLoading } = useUserAuthStore();
-  const { adminLogin } = useAdminAuthStore();
+  const { adminLogin, isLoading: isAdminLoading, errorMessage } = useAdminAuthStore();
   // Effect to redirect if an admin is already logged in
   // This handles cases where an admin manually navigates to /admin/login while already authenticated
   React.useEffect(() => {
@@ -48,9 +48,9 @@ const AdminLoginPage = () => {
   // Render the login form
   return (
     <div>
-      <section className="w-full sticky top-0 bg-secondary pt-16 px-4 h-16 z-50">
+      {/* <section className="w-full sticky top-0 bg-secondary pt-16 px-4 h-16 z-50">
         <hr className="border-t border-gray-500" />
-      </section>
+      </section> */}
       <div className="p-4 flex justify-center items-center h-screen bg-base-300 font-inter">
         <div className="card w-md bg-base-100 shadow-xl rounded-2xl">
           <div className="card-body p-8">
@@ -58,6 +58,12 @@ const AdminLoginPage = () => {
               Admin Login
             </h2>
             <p>Welcome back to the admin panel</p>
+
+            {errorMessage && (
+              <div className="alert alert-error shadow-sm my-3">
+                <span className="text-sm">{errorMessage}</span>
+              </div>
+            )}
 
             <form onSubmit={handleSubmit} className="my-2">
               <div className="relative w-full mb-4">
@@ -128,9 +134,9 @@ const AdminLoginPage = () => {
                 <button
                   type="submit"
                   className="w-full btn text-white btn-primary btn-lg rounded-full"
-                  disabled={isLoading} // Disable button while loading
+                  disabled={isLoading || isAdminLoading}
                 >
-                  {isLoading ? (
+                  {isAdminLoading ? (
                     <Loader2 className="h-5 w-5 animate-spin" />
                   ) : (
                     'Login as Admin'

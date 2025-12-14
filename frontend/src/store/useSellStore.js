@@ -12,17 +12,16 @@ export const useSellStore = create((set) => ({
     submitSellForm: async (formData) => {
         set({ isSubmitting: true, error: null, successMessage: null });
         try {
-            // Map frontend field names to backend field names
             const backendData = {
                 fullName: formData.fullName,
                 phoneNumber: formData.phoneNumber,
-                emailAddress: formData.email, // Backend expects 'emailAddress'
-                carMake: formData.make, // Backend expects 'carMake'
-                carModel: formData.model, // Backend expects 'carModel'
-                yearOfManufacture: formData.year, // Backend expects 'yearOfManufacture'
-                mileageKm: formData.mileage, // Backend expects 'mileageKm'
+                emailAddress: formData.email,
+                carMake: formData.make,
+                carModel: formData.model,
+                yearOfManufacture: formData.year,
+                mileageKm: formData.mileage,
                 condition: formData.condition,
-                uploadPhotos: formData.images, // Backend expects 'uploadPhotos'
+                uploadPhotos: formData.images,
                 additionalNotes: formData.additionalNotes,
             };
 
@@ -30,12 +29,17 @@ export const useSellStore = create((set) => ({
 
             set({ successMessage: res.data.message, isSubmitting: false });
             toast.success(res.data.message);
-            return true; // Return success
+            return true;
         } catch (error) {
-            const errorMessage = error.response?.data?.message || 'Failed to submit the form.';
-            toast.error(errorMessage);
-            set({ error: errorMessage, isSubmitting: false });
-            return false; // Return failure
+            const message = error.response?.data?.message || 'Failed to submit the form.';
+            const validationDetails = Array.isArray(error.response?.data?.errors)
+                ? error.response.data.errors.join(' ')
+                : '';
+            const combinedMessage = validationDetails ? `${message} ${validationDetails}` : message;
+            console.error('Sell form submission failed', error);
+            toast.error(combinedMessage);
+            set({ error: combinedMessage, isSubmitting: false });
+            return false;
         }
     },
 }));

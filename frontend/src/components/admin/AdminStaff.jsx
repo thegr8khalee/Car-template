@@ -1,5 +1,6 @@
 // AdminStaff.jsx
 import React, { useEffect } from 'react';
+import Skeleton from '../Skeleton';
 import { useDashboardStore } from '../../store/useDasboardStore';
 import { ChevronDown, ChevronLeft, UserPlus, Shield, Mail } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -31,7 +32,15 @@ const AdminStaff = () => {
     navigate('/admin/staff/add');
   };
 
-  if (isFetchingStaffs) return <div>Loading...</div>;
+  if (isFetchingStaffs) {
+    return (
+      <div className="space-y-2">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <Skeleton key={i} height={60} className="w-full" />
+        ))}
+      </div>
+    );
+  }
   if (staffError) return <div>Error: {staffError}</div>;
 
   return (

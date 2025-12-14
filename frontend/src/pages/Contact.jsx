@@ -1,12 +1,17 @@
 import React, { useState } from 'react';
 import branding from '../config/branding';
 import { motion } from 'framer-motion';
+import { axiosInstance } from '../lib/axios';
+import { Loader2 } from 'lucide-react';
 
 const Contact = () => {
   const [isFocusedMessage, setIsFocusedMessage] = useState(false);
   const [isFocusedName, setIsFocusedName] = useState(false);
   const [isFocusedEmail, setIsFocusedEmail] = useState(false);
   const [isFocusedPhone, setIsFocusedPhone] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -53,6 +58,27 @@ const Contact = () => {
     googleMapsApiKey && hasLocation
       ? `https://www.google.com/maps/embed/v1/place?key=${googleMapsApiKey}&q=${location.latitude},${location.longitude}&center=${location.latitude},${location.longitude}&zoom=17`
       : null;
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setErrorMessage(null);
+    setSuccessMessage(null);
+    setIsSubmitting(true);
+
+    try {
+      await axiosInstance.post('/interactions/contact', formData);
+      setSuccessMessage("Thanks for reaching out. We'll get back to you shortly.");
+      setFormData({ name: '', email: '', phone: '', message: '' });
+    } catch (error) {
+      const message =
+        error.response?.data?.message ||
+        'Failed to send your message. Please try again or contact us directly.';
+      console.error('Contact form submission failed', error);
+      setErrorMessage(message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className=" pt-35 font-inter min-h-screen items-center justify-center">
@@ -103,7 +129,17 @@ const Contact = () => {
               Use this form to send us a message. We'll get back to you as soon
               as possible.
             </p>
-            <form action="" className="my-2">
+            {errorMessage && (
+              <div className="alert alert-error my-4 text-sm">
+                <span>{errorMessage}</span>
+              </div>
+            )}
+            {successMessage && (
+              <div className="alert alert-success my-4 text-sm">
+                <span>{successMessage}</span>
+              </div>
+            )}
+            <form onSubmit={handleSubmit} className="my-2">
               <div className="relative w-full mb-4">
                 <input
                   type="text"
@@ -215,8 +251,19 @@ const Contact = () => {
                   Your Message
                 </label>
               </div>
-              <button className="w-full btn mt-2 text-white btn-primary btn-lg rounded-none">
-                Send Message
+              <button
+                type="submit"
+                className="w-full btn mt-2 text-white btn-primary btn-lg rounded-none"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  'Send Message'
+                )}
               </button>
             </form>
           </motion.div>
