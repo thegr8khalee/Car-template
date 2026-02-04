@@ -195,7 +195,7 @@ const Home = () => {
           id="hero"
           className="relative lg:hidden w-full h-screen bg-cover bg-center flex flex-col justify-between p-4"
           style={{
-            backgroundImage: `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url(${hero})`,
+            backgroundImage: `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url(https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)`,
           }}
         >
           {/* Middle Content */}
@@ -227,7 +227,7 @@ const Home = () => {
           id="desktop hero"
           className="relative hidden w-full h-screen bg-cover bg-center lg:flex flex-col justify-between p-12"
           style={{
-            backgroundImage: `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url(${hero})`,
+            backgroundImage: `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url(https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)`,
           }}
         >
           {/* Middle Content - Hero Text */}
@@ -377,7 +377,7 @@ const Home = () => {
           id="form"
           className="w-full py-25 px-4 h-full"
           style={{
-            backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(${hero})`,
+            backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
           }}
@@ -508,7 +508,7 @@ const Home = () => {
         <section
           id="hero"
           className="relative w-full h-screen bg-cover bg-center f1lex flex-col justify-between p-12"
-          style={{ backgroundImage: `url(${Heromobile})` }}
+          style={{ backgroundImage: `url(https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)` }}
         >
           {/* Middle Content - Hero Text */}
           <div className="pt-25 relative z-10 w-full max-w-7xl mx-auto text-white">

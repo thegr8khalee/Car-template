@@ -281,10 +281,11 @@ export const getAllReviews = async (req, res) => {
 
     // Handle case where no reviews are found
     if (reviews.length === 0) {
-      return res.status(404).json({
-        message: 'No reviews found.',
+      return res.status(200).json({
         totalItems: 0,
-        averageOverallRating: 0,
+        totalPages: 0,
+        currentPage: parseInt(page, 10),
+        averageRatings: 0,
         reviews: [],
       });
     }
