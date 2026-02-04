@@ -264,6 +264,12 @@ const Car = sequelize.define(
       {
         fields: ['category'],
       },
+       // Performance indexes added during audit
+       { fields: ['price'] },
+       { fields: ['condition'] },
+       { fields: ['fuelType'] },
+       { fields: ['createdAt'] },
+       { fields: ['sold'] },
     ],
   }
 );

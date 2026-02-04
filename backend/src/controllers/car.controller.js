@@ -77,19 +77,14 @@ export const getCarById = async (req, res) => {
     }
 
     // Find up to 4 related cars that share similar attributes.
-    // The query uses Op.or to find matches on any of the criteria.
+    // Optimized: Prioritize Category match only for performance
     const relatedCars = await Car.findAll({
       where: {
         id: { [Op.ne]: car.id }, // Exclude the current car
-        [Op.or]: [
-          { make: car.make },
-          { bodyType: car.bodyType },
-          { year: car.year },
-          { fuelType: car.fuelType },
-          { category: car.category },
-        ],
+        category: car.category,  // Simple index-friendly lookup
       },
       limit: 4, // Limit the number of related cars
+      order: [['createdAt', 'DESC']] // Most recent first
     });
 
     // Find all approved reviews for the primary car

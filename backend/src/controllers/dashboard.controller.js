@@ -63,38 +63,72 @@ export const getDashboardStats = async (req, res) => {
   try {
     const { thisMonth, lastMonth, thisYear, lastYear } = calculateDateRanges();
 
-    // Car inventory stats
-    const totalCars = await Car.count();
-    const soldCars = await Car.count({ where: { sold: true } });
+    // Parallelize independent queries
+    const [
+      totalCars,
+      soldCars,
+      carsAddedThisMonth,
+      carsAddedLastMonth,
+      soldThisMonth,
+      soldLastMonth,
+      sellingToUsThisYear,
+      sellingToUsLastYear,
+      sellingToUsLastMonth,
+      sellingToUsThisMonth,
+      sellingToUsTotal,
+      SellingToUsPending,
+      SellingToUsOfferSent,
+      SellingToUsAccepted,
+      SellingToUsRejected,
+      totalBlogs,
+      publishedBlogs,
+      draftBlogs,
+      totalViews,
+      totalUsers,
+      totalComments,
+      pendingComments,
+      totalReviews,
+      pendingReviews,
+      newsletterSubscribers
+    ] = await Promise.all([
+      // Car inventory stats
+      Car.count(),
+      Car.count({ where: { sold: true } }),
+      Car.count({ where: { createdAt: { [Op.gte]: thisMonth.start } } }),
+      Car.count({ where: { createdAt: { [Op.gte]: lastMonth.start } } }),
+      Car.count({ where: { createdAt: { [Op.gte]: thisMonth.start }, sold: true } }),
+      Car.count({ where: { createdAt: { [Op.gte]: lastMonth.start }, sold: true } }),
+
+      // Selling to us stats
+      SellNow.count({ where: { createdAt: { [Op.gte]: thisYear.start } } }),
+      SellNow.count({ where: { createdAt: { [Op.gte]: lastYear.start } } }),
+      SellNow.count({ where: { createdAt: { [Op.gte]: lastMonth.start } } }),
+      SellNow.count({ where: { createdAt: { [Op.gte]: thisMonth.start } } }),
+      SellNow.count(),
+      SellNow.count({ where: { offerStatus: 'Pending' } }),
+      SellNow.count({ where: { offerStatus: 'Offer Sent' } }),
+      SellNow.count({ where: { offerStatus: 'Accepted' } }),
+      SellNow.count({ where: { offerStatus: 'Rejected' } }),
+
+      // Blog stats
+      Blog.count(),
+      Blog.count({ where: { status: 'published' } }),
+      Blog.count({ where: { status: 'draft' } }),
+      Blog.sum('viewCount').then(val => val || 0),
+
+      // User/Engagement stats
+      User.count(),
+      Comment.count(),
+      Comment.count({ where: { status: 'pending' } }),
+      Review.count(),
+      Review.count({ where: { status: 'pending' } }),
+      Newsletter.count({ where: { unsubscribedAt: null } })
+    ]);
+
     const availableCars = totalCars - soldCars;
-    const carsAddedThisMonth = await Car.count({
-      where: { createdAt: { [Op.gte]: thisMonth.start } },
-    });
-    const carsAddedLastMonth = await Car.count({
-      where: { createdAt: { [Op.gte]: lastMonth.start } },
-    });
     const inventoryRate = ((availableCars / totalCars) * 100).toFixed(1);
-    const soldThisMonth = await Car.count({
-      where: { createdAt: { [Op.gte]: thisMonth.start }, sold: true },
-    });
-    const soldLastMonth = await Car.count({
-      where: { createdAt: { [Op.gte]: lastMonth.start }, sold: true },
-    });
     const salesChange = calculatePercentageChange(soldThisMonth, soldLastMonth);
 
-    //selling to us stats
-    const sellingToUsThisYear = await SellNow.count({
-      where: { createdAt: { [Op.gte]: thisYear.start } },
-    });
-    const sellingToUsLastYear = await SellNow.count({
-      where: { createdAt: { [Op.gte]: lastYear.start } },
-    });
-    const sellingToUsLastMonth = await SellNow.count({
-      where: { createdAt: { [Op.gte]: lastMonth.start } },
-    });
-    const sellingToUsThisMonth = await SellNow.count({
-      where: { createdAt: { [Op.gte]: thisMonth.start } },
-    });
     const sellingToUsChange = calculatePercentageChange(
       sellingToUsThisMonth,
       sellingToUsLastMonth
@@ -103,52 +137,22 @@ export const getDashboardStats = async (req, res) => {
       sellingToUsThisYear,
       sellingToUsLastYear
     );
-    const sellingToUsTotal = await SellNow.count();
-    const SellingToUsPending = await SellNow.count({
-      where: { offerStatus: 'Pending' },
-    });
-    const SellingToUsOfferSent = await SellNow.count({
-      where: { offerStatus: 'Offer Sent' },
-    });
-    const SellingToUsAccepted = await SellNow.count({
-      where: { offerStatus: 'Accepted' },
-    });
-    const SellingToUsRejected = await SellNow.count({
-      where: { offerStatus: 'Rejected' },
-    });
-
-    // Blog stats
-    const totalBlogs = await Blog.count();
-    const publishedBlogs = await Blog.count({ where: { status: 'published' } });
-    const draftBlogs = await Blog.count({ where: { status: 'draft' } });
-    const totalViews = (await Blog.sum('viewCount')) || 0;
-
-    // User engagement stats
-    const totalUsers = await User.count();
-    const totalComments = await Comment.count();
-    const pendingComments = await Comment.count({
-      where: { status: 'pending' },
-    });
-    const totalReviews = await Review.count();
-    const pendingReviews = await Review.count({ where: { status: 'pending' } });
-
-    // Newsletter stats
-    const newsletterSubscribers = await Newsletter.count({
-      where: { unsubscribedAt: null },
-    });
 
     // Revenue calculation (only for super_admin)
     let revenueStats = null;
     if (req.admin.role === 'super_admin') {
-      const totalRevenue =
-        (await Car.sum('price', { where: { sold: true } })) || 0;
-      const monthlyRevenue =
-        (await Car.sum('price', {
+      const [totalRevenueVal, monthlyRevenueVal] = await Promise.all([
+        Car.sum('price', { where: { sold: true } }),
+        Car.sum('price', {
           where: {
             sold: true,
             updatedAt: { [Op.gte]: thisMonth.start },
           },
-        })) || 0;
+        })
+      ]);
+      
+      const totalRevenue = totalRevenueVal || 0;
+      const monthlyRevenue = monthlyRevenueVal || 0;
 
       revenueStats = {
         totalRevenue: formatCurrency(totalRevenue),
@@ -157,25 +161,25 @@ export const getDashboardStats = async (req, res) => {
       };
     }
 
-    // Recent activity counts
+    // Recent activity counts - also parallelize
+    const [newUsersThisMonth, newCommentsThisWeek, newReviewsThisWeek] = await Promise.all([
+      User.count({ where: { createdAt: { [Op.gte]: thisMonth.start } } }),
+      Comment.count({
+        where: {
+          createdAt: { [Op.gte]: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) },
+        },
+      }),
+      Review.count({
+        where: {
+          createdAt: { [Op.gte]: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) },
+        },
+      })
+    ]);
+
     const recentActivity = {
-      newUsersThisMonth: await User.count({
-        where: { createdAt: { [Op.gte]: thisMonth.start } },
-      }),
-      newCommentsThisWeek: await Comment.count({
-        where: {
-          createdAt: {
-            [Op.gte]: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-          },
-        },
-      }),
-      newReviewsThisWeek: await Review.count({
-        where: {
-          createdAt: {
-            [Op.gte]: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-          },
-        },
-      }),
+      newUsersThisMonth,
+      newCommentsThisWeek,
+      newReviewsThisWeek,
     };
 
     res.status(200).json({
@@ -186,7 +190,7 @@ export const getDashboardStats = async (req, res) => {
           available: availableCars,
           sold: soldCars,
           addedThisMonth: carsAddedThisMonth,
-          inventoryRate: ((availableCars / totalCars) * 100).toFixed(1),
+          inventoryRate: inventoryRate,
           soldThisMonth,
           soldLastMonth,
           salesChange,
