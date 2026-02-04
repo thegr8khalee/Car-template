@@ -1,6 +1,7 @@
 // src/components/Admin/AdminDashboardContent.jsx
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Skeleton from '../Skeleton';
 import {
   Car,
   CarFront,
@@ -458,23 +459,23 @@ const AdminDashboardContent = () => {
     const IconComponent = stat.icon;
 
     return (
-      <div className="stat shadow-lg bg-base-100 rounded-2xl p-6 hover:shadow-xl transition-shadow">
+      <div className="group bg-white rounded-2xl p-6 border border-gray-100 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300">
         <div className="flex items-start justify-between mb-4">
-          <div className={`rounded-xl text-primary`}>
-            <IconComponent className={`size-8`} />
+          <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+            <IconComponent className="w-6 h-6 text-primary" />
           </div>
           {stat.change && (
             <div
-              className={`flex items-center space-x-1 px-2 py-1 rounded-full text-sm font-medium ${
+              className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${
                 stat.trend === 'up'
-                  ? 'bg-green-100 text-green-700'
-                  : 'bg-red-100 text-red-700'
+                  ? 'bg-emerald-100 text-emerald-700'
+                  : 'bg-red-100 text-red-600'
               }`}
             >
               {stat.trend === 'up' ? (
-                <TrendingUp className="size-3" />
+                <TrendingUp className="w-3 h-3" />
               ) : (
-                <TrendingDown className="size-3" />
+                <TrendingDown className="w-3 h-3" />
               )}
               <span>{stat.change}</span>
             </div>
@@ -482,14 +483,14 @@ const AdminDashboardContent = () => {
         </div>
 
         <div className="space-y-1">
-          <div className="font-bold text-3xl text-base-content">
+          <div className="font-bold text-3xl text-gray-900">
             {stat.value}
           </div>
-          <div className="text-base font-medium text-base-content opacity-70">
+          <div className="text-sm font-medium text-gray-600">
             {stat.label}
           </div>
           {stat.subtitle && (
-            <div className="text-sm text-base-content opacity-50">
+            <div className="text-xs text-gray-400 mt-1">
               {stat.subtitle}
             </div>
           )}
@@ -503,27 +504,29 @@ const AdminDashboardContent = () => {
 
     return (
       <div
-        className={`stat shadow-lg rounded-2xl p-4 hover:shadow-xl transition-shadow ${
+        className={`rounded-2xl p-5 transition-all duration-300 ${
           stat.urgent
-            ? 'bg-warning bg-opacity-10 border border-warning'
-            : 'bg-base-100'
+            ? 'bg-amber-50 border-2 border-amber-200'
+            : 'bg-white border border-gray-100 hover:border-gray-200'
         }`}
       >
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className={` text-primary`}>
-              <IconComponent className={`size-8 `} />
+          <div className="flex items-center gap-4">
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${stat.urgent ? 'bg-amber-100' : 'bg-primary/10'}`}>
+              <IconComponent className={`w-6 h-6 ${stat.urgent ? 'text-amber-600' : 'text-primary'}`} />
             </div>
             <div>
-              <div className="font-bold text-xl">{stat.value}</div>
-              <div className="text-sm opacity-70">{stat.label}</div>
+              <div className="font-bold text-2xl text-gray-900">{stat.value}</div>
+              <div className="text-sm font-medium text-gray-600">{stat.label}</div>
               {stat.subtitle && (
-                <div className="text-xs opacity-50">{stat.subtitle}</div>
+                <div className="text-xs text-gray-400">{stat.subtitle}</div>
               )}
             </div>
           </div>
           {stat.urgent && (
-            <div className="badge badge-warning badge-sm">Urgent</div>
+            <span className="px-3 py-1 bg-amber-500 text-white text-xs font-semibold rounded-full">
+              Urgent
+            </span>
           )}
         </div>
       </div>
@@ -672,12 +675,68 @@ const AdminDashboardContent = () => {
     );
   };
 
-  if (isLoading && !dashboardStats) {
+  if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="flex items-center space-x-2">
-          <Loader2 className="size-6 animate-spin" />
-          <span>Loading dashboard...</span>
+      <div className="space-y-8 animate-pulse">
+        {/* Header Skeleton */}
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+          <div className="space-y-3">
+            <div className="h-10 bg-gray-200 rounded-xl w-72"></div>
+            <div className="h-5 bg-gray-200 rounded-lg w-96"></div>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="h-16 w-48 bg-gray-200 rounded-2xl"></div>
+            <div className="h-10 w-10 bg-gray-200 rounded-full"></div>
+          </div>
+        </div>
+        
+        {/* Stats Sections Skeleton */}
+        {[...Array(3)].map((_, sectionIndex) => (
+          <div key={sectionIndex} className="space-y-4">
+            <div className="h-6 bg-gray-200 rounded-lg w-40"></div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="bg-white rounded-2xl p-6 border border-gray-100">
+                  <div className="flex justify-between mb-4">
+                    <div className="w-12 h-12 bg-gray-200 rounded-xl"></div>
+                    <div className="w-16 h-6 bg-gray-200 rounded-full"></div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="h-9 bg-gray-200 rounded-lg w-20"></div>
+                    <div className="h-4 bg-gray-200 rounded w-28"></div>
+                    <div className="h-3 bg-gray-200 rounded w-20"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+
+        {/* Bottom Section Skeleton */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 space-y-4">
+            <div className="h-6 bg-gray-200 rounded-lg w-40"></div>
+            <div className="bg-white rounded-2xl p-6 border border-gray-100 space-y-4">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="flex items-center gap-4">
+                  <div className="w-10 h-10 bg-gray-200 rounded-xl"></div>
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 bg-gray-200 rounded w-32"></div>
+                    <div className="h-3 bg-gray-200 rounded w-48"></div>
+                  </div>
+                  <div className="h-3 bg-gray-200 rounded w-20"></div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="space-y-4">
+            <div className="h-6 bg-gray-200 rounded-lg w-32"></div>
+            <div className="bg-white rounded-2xl p-6 border border-gray-100 space-y-4">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="h-12 bg-gray-200 rounded-xl"></div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -685,11 +744,19 @@ const AdminDashboardContent = () => {
 
   if (error && !dashboardStats) {
     return (
-      <div className="alert alert-error">
-        <AlertCircle className="size-6" />
-        <span>Error loading dashboard: {error}</span>
-        <button className="btn btn-sm" onClick={handleRefresh}>
-          <RefreshCw className="size-4" />
+      <div className="flex items-center gap-4 p-5 bg-red-50 border border-red-200 rounded-2xl">
+        <div className="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0">
+          <AlertCircle className="w-6 h-6 text-red-500" />
+        </div>
+        <div className="flex-1">
+          <p className="font-semibold text-red-700">Error loading dashboard</p>
+          <p className="text-sm text-red-600">{error}</p>
+        </div>
+        <button 
+          className="px-4 py-2 bg-red-500 text-white rounded-xl text-sm font-medium hover:bg-red-600 transition-colors flex items-center gap-2" 
+          onClick={handleRefresh}
+        >
+          <RefreshCw className="w-4 h-4" />
           Retry
         </button>
       </div>
@@ -701,16 +768,15 @@ const AdminDashboardContent = () => {
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-bold text-base-content">
-            Dashboard Overview
+          <h2 className="text-2xl font-bold text-gray-900">
+            Welcome back, {authUser?.username}! 
           </h2>
-          <p className="text-base-content opacity-60 mt-1">
-            Welcome back, {authUser?.username}! Here's what's happening with
-            your dealership.
+          <p className="text-gray-500 mt-1">
+            Here's what's happening with your dealership today.
           </p>
           {lastUpdated && (
-            <div className="flex items-center space-x-2 mt-2 text-sm text-base-content opacity-50">
-              <Clock className="size-4" />
+            <div className="flex items-center gap-2 mt-2 text-xs text-gray-400">
+              <Clock className="w-3.5 h-3.5" />
               <span>
                 Last updated: {new Date(lastUpdated).toLocaleString()}
               </span>
@@ -719,37 +785,34 @@ const AdminDashboardContent = () => {
         </div>
 
         {/* Admin Profile Card & Refresh */}
-        <div className="flex items-center space-x-4">
-          <div className="stat shadow-lg rounded-2xl flex flex-row p-4 bg-primary text-secondary min-w-fit">
-            <div className="flex items-center space-x-3">
-              <div className="avatar">
-                <div className="w-12 h-12 rounded-full">
-                  <img
-                    src={
-                      authUser?.avatar ||
-                      'https://img.daisyui.com/images/profile/demo/anakeen@192.webp'
-                    }
-                    alt="Admin avatar"
-                  />
-                </div>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 px-4 py-3 bg-primary rounded-2xl shadow-lg shadow-primary/20">
+            <div className="w-11 h-11 rounded-xl overflow-hidden ring-2 ring-white/30">
+              <img
+                src={
+                  authUser?.avatar ||
+                  'https://img.daisyui.com/images/profile/demo/anakeen@192.webp'
+                }
+                alt="Admin avatar"
+                className="w-full h-full rounded-full object-cover"
+              />
+            </div>
+            <div className="text-secondary">
+              <div className="font-semibold">
+                {authUser?.username}
               </div>
-              <div>
-                <div className="font-semibold text-lg">
-                  {authUser?.username}
-                </div>
-                <div className="text-sm opacity-80">
-                  {authUser?.role?.replace('_', ' ').toUpperCase() || 'ADMIN'}
-                </div>
+              <div className="text-xs opacity-75">
+                {authUser?.role?.replace('_', ' ').toUpperCase() || 'ADMIN'}
               </div>
             </div>
           </div>
           <button
-            className="btn bg-transparent border-0  btn-circle btn-sm"
+            className="w-10 h-10 rounded-xl bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-50 hover:border-gray-300 transition-all"
             onClick={handleRefresh}
             disabled={isLoading}
           >
             <RefreshCcw
-              className={`size-4 ${isLoading ? 'animate-spin' : ''}`}
+              className={`w-4 h-4 text-gray-600 ${isLoading ? 'animate-spin' : ''}`}
             />
           </button>
         </div>
@@ -758,10 +821,11 @@ const AdminDashboardContent = () => {
       {/* Primary Stats - Cars and Revenue */}
       {primaryStats.length > 0 && (
         <div>
-          <h3 className="text-xl font-semibold mb-4 text-base-content">
+          <h3 className="text-lg font-semibold mb-4 text-gray-900 flex items-center gap-2">
+            <BarChart3 className="w-5 h-5 text-primary" />
             Business Overview
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {primaryStats.map((stat, index) => (
               <StatCard key={index} stat={stat} />
             ))}
@@ -772,10 +836,11 @@ const AdminDashboardContent = () => {
       {/* Selling to Us Stats */}
       {sellingToUsStats.length > 0 && (
         <div>
-          <h3 className="text-xl font-semibold mb-4 text-base-content">
+          <h3 className="text-lg font-semibold mb-4 text-gray-900 flex items-center gap-2">
+            <Car className="w-5 h-5 text-primary" />
             Selling to Us Overview
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {sellingToUsStats.map((stat, index) => (
               <StatCard key={index} stat={stat} />
             ))}
@@ -786,10 +851,11 @@ const AdminDashboardContent = () => {
       {/* Content Stats */}
       {contentStats.length > 0 && (
         <div>
-          <h3 className="text-xl font-semibold mb-4 text-base-content">
+          <h3 className="text-lg font-semibold mb-4 text-gray-900 flex items-center gap-2">
+            <StickyNote className="w-5 h-5 text-primary" />
             Content Performance
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {contentStats.map((stat, index) => (
               <StatCard key={index} stat={stat} />
             ))}
@@ -800,10 +866,11 @@ const AdminDashboardContent = () => {
       {/* User Stats */}
       {userAnalyticsStats.length > 0 && authUser?.role !== 'moderator' && (
         <div>
-          <h3 className="text-xl font-semibold mb-4 text-base-content">
+          <h3 className="text-lg font-semibold mb-4 text-gray-900 flex items-center gap-2">
+            <Users className="w-5 h-5 text-primary" />
             User Analytics
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {userAnalyticsStats.map((stat, index) => (
               <StatCard key={index} stat={stat} />
             ))}
@@ -814,11 +881,11 @@ const AdminDashboardContent = () => {
       {/** top performers */}
       {topPerformersData.length > 0 && (
         <div>
-          <h3 className="text-xl font-semibold mb-4 text-base-content flex items-center space-x-2">
-            <AlertCircle className="size-5 text-warning" />
-            <span>Top Performers</span>
+          <h3 className="text-lg font-semibold mb-4 text-gray-900 flex items-center gap-2">
+            <TrendingUp className="w-5 h-5 text-primary" />
+            Top Performers
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {topPerformersData.map((stat, index) => (
               <topPerformersData key={index} stat={stat} />
             ))}
@@ -829,11 +896,11 @@ const AdminDashboardContent = () => {
       {/* Moderation Queue */}
       {moderationQueueStats.length > 0 && (
         <div>
-          <h3 className="text-xl font-semibold mb-4 text-base-content flex items-center space-x-2">
-            <AlertCircle className="size-5 text-warning" />
-            <span>Content Moderation</span>
+          <h3 className="text-lg font-semibold mb-4 text-gray-900 flex items-center gap-2">
+            <AlertCircle className="w-5 h-5 text-amber-500" />
+            Content Moderation
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {moderationQueueStats.map((stat, index) => (
               <ModerationCard key={index} stat={stat} />
             ))}
@@ -842,37 +909,38 @@ const AdminDashboardContent = () => {
       )}
 
       {/* Recent Activity & Quick Actions */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Recent Activity */}
         <div className="lg:col-span-2">
-          <h3 className="text-xl font-semibold mb-4 text-base-content">
-            Recent Activity{' '}
-            <span className="font-regular text-primary">
-              ({totalRecentActivityLength})
+          <h3 className="text-lg font-semibold mb-4 text-gray-900 flex items-center gap-2">
+            <Activity className="w-5 h-5 text-primary" />
+            Recent Activity
+            <span className="ml-1 px-2 py-0.5 bg-primary/10 text-primary text-sm font-medium rounded-full">
+              {totalRecentActivityLength}
             </span>
           </h3>
-          <div className="bg-base-100 rounded-2xl shadow-lg p-6 max-h-100 overflow-y-auto">
+          <div className="bg-white rounded-2xl border border-gray-100 p-6 max-h-[400px] overflow-y-auto">
             {recentActivityData.length > 0 ? (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {recentActivityData.map((activity, index) => {
                   const IconComponent = activity.icon;
                   return (
                     <div
                       key={index}
-                      className="flex items-center space-x-4 p-3 pl-0 rounded-lg hover:bg-base-200 transition-colors"
+                      className="flex items-center gap-4 p-3 rounded-xl hover:bg-gray-50 transition-colors group"
                     >
-                      <div className="">
-                        <IconComponent className="size-6 text-primary" />
+                      <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                        <IconComponent className="w-5 h-5 text-primary" />
                       </div>
-                      <div className="flex-1">
-                        <div className="font-medium text-base-content">
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium text-gray-900">
                           {activity.action}
                         </div>
-                        <div className="text-sm text-base-content opacity-70">
+                        <div className="text-sm text-gray-500 truncate">
                           {activity.item}
                         </div>
                       </div>
-                      <div className="text-sm text-base-content opacity-50">
+                      <div className="text-xs text-gray-400 whitespace-nowrap">
                         {activity.time}
                       </div>
                     </div>
@@ -880,9 +948,9 @@ const AdminDashboardContent = () => {
                 })}
               </div>
             ) : (
-              <div className="text-center py-8 text-base-content opacity-50">
-                <Activity className="size-12 mx-auto mb-4" />
-                <p>No recent activity available</p>
+              <div className="text-center py-12">
+                <Activity className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                <p className="text-gray-500">No recent activity available</p>
               </div>
             )}
           </div>
@@ -890,45 +958,46 @@ const AdminDashboardContent = () => {
 
         {/* Quick Actions */}
         <div>
-          <h3 className="text-xl font-semibold mb-4 text-base-content">
+          <h3 className="text-lg font-semibold mb-4 text-gray-900 flex items-center gap-2">
+            <BarChart3 className="w-5 h-5 text-primary" />
             Quick Actions
           </h3>
-          <div className="bg-base-100 rounded-2xl shadow-lg p-6">
-            <div className="space-y-4">
+          <div className="bg-white rounded-2xl border border-gray-100 p-6">
+            <div className="space-y-3">
               <button
-                className="btn btn-primary w-full rounded-xl text-lg font-medium"
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-primary text-secondary font-semibold rounded-xl hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20"
                 onClick={() => navigate('/admin/cars/new')}
               >
-                <Car className="size-5" />
+                <Car className="w-5 h-5" />
                 Add New Car
               </button>
 
               <button
-                className="btn btn-outline btn-primary w-full rounded-xl text-lg font-medium"
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white text-gray-700 font-medium rounded-xl border-2 border-gray-200 hover:border-primary hover:text-primary transition-colors"
                 onClick={() => navigate('/admin/blogs/new')}
               >
-                <StickyNote className="size-5" />
+                <StickyNote className="w-5 h-5" />
                 Create Blog Post
               </button>
 
               <button
-                className="btn btn-outline btn-secondary w-full rounded-xl text-lg font-medium"
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white text-gray-700 font-medium rounded-xl border-2 border-gray-200 hover:border-amber-500 hover:text-amber-600 transition-colors"
                 onClick={() => navigate('/admin/moderation')}
               >
-                <MessageSquareMore className="size-5" />
+                <MessageSquareMore className="w-5 h-5" />
                 Review Comments
                 {(dashboardStats?.engagement?.pendingComments || 0) > 0 && (
-                  <div className="badge badge-warning badge-sm ml-2">
+                  <span className="ml-1 px-2 py-0.5 bg-amber-500 text-white text-xs font-semibold rounded-full">
                     {dashboardStats.engagement.pendingComments}
-                  </div>
+                  </span>
                 )}
               </button>
 
               <button
-                className="btn btn-outline btn-accent w-full rounded-xl text-lg font-medium"
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white text-gray-700 font-medium rounded-xl border-2 border-gray-200 hover:border-blue-500 hover:text-blue-600 transition-colors"
                 onClick={() => navigate('/admin/analytics')}
               >
-                <BarChart3 className="size-5" />
+                <BarChart3 className="w-5 h-5" />
                 View Analytics
               </button>
             </div>
@@ -940,32 +1009,42 @@ const AdminDashboardContent = () => {
       {topPerformersData.length > 0 &&
         topPerformersData.some((section) => section.items.length > 0) && (
           <div>
-            <h3 className="text-xl font-semibold mb-4 text-base-content">
+            <h3 className="text-lg font-semibold mb-4 text-gray-900 flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-primary" />
               Top Performers
             </h3>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {topPerformersData.map(
                 (section, index) =>
                   section.items.length > 0 && (
                     <div
                       key={index}
-                      className="bg-base-100 rounded-2xl shadow-lg p-6"
+                      className="bg-white rounded-2xl border border-gray-100 p-6"
                     >
-                      <h4 className="font-semibold text-lg mb-4 text-base-content">
+                      <h4 className="font-semibold text-gray-900 mb-4">
                         {section.title}
                       </h4>
                       <div className="space-y-3">
                         {section.items.map((item, itemIndex) => (
                           <div
                             key={itemIndex}
-                            className="flex items-center justify-between p-3 rounded-lg bg-base-200"
+                            className="flex items-center justify-between p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors"
                           >
-                            <div className="font-medium text-base-content truncate flex-1 mr-2">
-                              {item.name}
+                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                              <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                                itemIndex === 0 ? 'bg-amber-400 text-amber-900' :
+                                itemIndex === 1 ? 'bg-gray-300 text-gray-700' :
+                                'bg-amber-700/30 text-amber-800'
+                              }`}>
+                                {itemIndex + 1}
+                              </span>
+                              <span className="font-medium text-gray-900 truncate">
+                                {item.name}
+                              </span>
                             </div>
-                            <div className="text-sm text-base-content opacity-70">
+                            <span className="text-sm text-gray-500 ml-2">
                               {item.value} {item.subtitle}
-                            </div>
+                            </span>
                           </div>
                         ))}
                       </div>

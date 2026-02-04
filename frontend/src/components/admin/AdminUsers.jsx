@@ -1,15 +1,17 @@
 // AdminUsers.jsx
 import React, { useEffect, useState } from 'react';
-import Skeleton from '../Skeleton';
 import { useDashboardStore } from '../../store/useDasboardStore';
 import {
   ChevronDown,
   ChevronLeft,
+  ChevronRight,
   User as UserIcon,
+  Users,
   Mail,
   Phone,
   Calendar,
   Search,
+  XCircle,
 } from 'lucide-react';
 // import { useNavigate } from 'react-router-dom';
 
@@ -41,78 +43,105 @@ const AdminUsers = ({ setActiveSection, setSelectedUser }) => {
 
   if (isFetchingUsers) {
     return (
-      <div className="space-y-2">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <Skeleton key={i} height={60} className="w-full" />
-        ))}
+      <div className="space-y-6">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-gray-200 animate-pulse" />
+          <div className="space-y-2">
+            <div className="h-5 w-32 bg-gray-200 rounded animate-pulse" />
+            <div className="h-4 w-48 bg-gray-200 rounded animate-pulse" />
+          </div>
+        </div>
+        <div className="space-y-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="bg-white rounded-xl border border-gray-100 p-4">
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 rounded-full bg-gray-200 animate-pulse" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-5 w-32 bg-gray-200 rounded animate-pulse" />
+                  <div className="h-4 w-48 bg-gray-200 rounded animate-pulse" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
+  
   if (userError)
     return (
-      <div className="text-center py-8 text-error">Error: {userError}</div>
+      <div className="bg-white rounded-xl border border-gray-100 p-8 text-center">
+        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 flex items-center justify-center">
+          <XCircle className="w-8 h-8 text-red-500" />
+        </div>
+        <p className="text-red-600 font-medium">Error: {userError}</p>
+      </div>
     );
 
   return (
-    <div className="bg-base-200 rounded-lg space-y-4 max-h-[60vh] overflow-y-auto">
-      {/* Header with Search */}
-      <div className="flex flex-col justify-between items-start sm:flex-row gap-2">
-        <h1 className="text-primary font-bold flex text-xl">
-          {users?.length || 0} User{users?.length > 1 ? 's' : ''}
-        </h1>
-
-        {/* Search Bar */}
-        <form onSubmit={handleSearch} className="flex gap-2 w-full max-w-3xl">
-          <div className="form-control flex w-full">
-            <div className="input-group flex w-full space-x-1">
-              <input
-                type="text"
-                placeholder="Search users..."
-                className="input rounded-full w-full"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-              <button type="submit" className="btn btn-circle btn-primary">
-                <Search className="size-5" />
-              </button>
-            </div>
-          </div>
-        </form>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+          <Users className="w-5 h-5 text-primary" />
+        </div>
+        <div>
+          <h1 className="text-xl font-bold text-gray-900">User Management</h1>
+          <p className="text-sm text-gray-500">{users?.length || 0} registered user{users?.length !== 1 ? 's' : ''}</p>
+        </div>
       </div>
 
-      {/* Users List */}
-      {users?.length === 0 ? (
-        <div className="text-center py-8 text-gray-500">No users found.</div>
-      ) : (
-        users?.map((user) => (
-          <UserCard
-            key={user.id}
-            item={user}
-            setActiveSection={setActiveSection}
-            setSelectedUser={setSelectedUser}
+      {/* Search Bar */}
+      <form onSubmit={handleSearch} className="flex gap-3">
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search users..."
+            className="w-full pl-11 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
-        ))
-      )}
+        </div>
+        <button
+          type="submit"
+          className="px-5 py-2.5 bg-primary text-secondary font-semibold rounded-xl hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20"
+        >
+          Search
+        </button>
+      </form>
+
+      {/* Users List */}
+      <div className="space-y-3 max-h-[60vh] overflow-y-auto">
+        {users?.length === 0 ? (
+          <div className="bg-white rounded-xl border border-gray-100 p-12 text-center">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+              <UserIcon className="w-8 h-8 text-gray-400" />
+            </div>
+            <p className="text-gray-500">No users found.</p>
+          </div>
+        ) : (
+          users?.map((user) => (
+            <UserCard
+              key={user.id}
+              item={user}
+              setActiveSection={setActiveSection}
+              setSelectedUser={setSelectedUser}
+            />
+          ))
+        )}
+      </div>
 
       {/* Pagination */}
       {totalUserPages > 1 && (
-        <div className="flex items-center justify-center gap-2 pt-4">
-          {totalUserPages > 3 && currentUserPage > 3 && (
-            <button
-              onClick={() => handlePageChange(1)}
-              className="btn btn-circle btn-primary"
-            >
-              1
-            </button>
-          )}
-          {currentUserPage > 1 && (
-            <button
-              onClick={() => handlePageChange(currentUserPage - 1)}
-              className="btn btn-circle btn-primary"
-            >
-              <ChevronLeft className="size-5 text-white" />
-            </button>
-          )}
+        <div className="flex items-center justify-center gap-2 pt-4 border-t border-gray-100">
+          <button
+            onClick={() => handlePageChange(currentUserPage - 1)}
+            disabled={currentUserPage === 1}
+            className="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
           {[...Array(totalUserPages)]
             .map((_, index) => index + 1)
             .filter(
@@ -123,23 +152,22 @@ const AdminUsers = ({ setActiveSection, setSelectedUser }) => {
               <button
                 key={page}
                 onClick={() => handlePageChange(page)}
-                className={`btn btn-circle ${
+                className={`w-9 h-9 rounded-xl font-medium transition-colors ${
                   page === currentUserPage
-                    ? 'btn-primary text-white'
-                    : 'bg-gray-200 hover:bg-gray-300'
+                    ? 'bg-primary text-secondary'
+                    : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
                 }`}
               >
                 {page}
               </button>
             ))}
-          {currentUserPage < totalUserPages && (
-            <button
-              onClick={() => handlePageChange(currentUserPage + 1)}
-              className="btn rounded-full btn-primary"
-            >
-              Next
-            </button>
-          )}
+          <button
+            onClick={() => handlePageChange(currentUserPage + 1)}
+            disabled={currentUserPage === totalUserPages}
+            className="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
         </div>
       )}
     </div>
@@ -148,6 +176,7 @@ const AdminUsers = ({ setActiveSection, setSelectedUser }) => {
 
 const UserCard = ({ item, setActiveSection, setSelectedUser }) => {
   const [isDropDownOpen, setIsDropDownOpen] = React.useState(false);
+  const { deleteUser } = useDashboardStore();
   const [dropdownHeight, setDropdownHeight] = React.useState(0);
   const dropdownRef = React.useRef(null);
   // const navigate = useNavigate();
@@ -173,11 +202,11 @@ const UserCard = ({ item, setActiveSection, setSelectedUser }) => {
     }
   };
 
-  // const handleDelete = (id) => {
-  //   // TODO: Implement delete functionality
-  //   window.confirm('Are you sure you want to delete this user?') &&
-  //     console.log('Delete user:', id);
-  // };
+  const handleDelete = async (id) => {
+    if (window.confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+      await deleteUser(id);
+    }
+  };
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -188,33 +217,32 @@ const UserCard = ({ item, setActiveSection, setSelectedUser }) => {
   };
 
   return (
-    <div className="rounded-xl bg-base-100 shadow-sm">
+    <div className="bg-white rounded-xl border border-gray-100 hover:border-gray-200 transition-all duration-200 overflow-hidden">
       <div className="w-full flex items-center justify-between p-4">
         {/* Avatar */}
-        <div className="avatar placeholder">
-          <UserIcon className="size-16 text-gray-400" />
+        <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
+          <UserIcon className="w-7 h-7 text-gray-400" />
         </div>
 
         {/* User Info */}
         <div className="flex-1 px-4">
-          <h2 className="font-semibold text-base font-[inter] flex items-center gap-2">
-            {/* <UserIcon className="size-4" /> */}
+          <h2 className="font-semibold text-gray-900 flex items-center gap-2">
             {item.username}
           </h2>
           <div className="flex flex-col gap-1 text-sm text-gray-500 mt-1">
-            <span className="flex items-center gap-1">
-              <Mail className="size-4" />
+            <span className="flex items-center gap-1.5">
+              <Mail className="w-4 h-4" />
               {item.email}
             </span>
             {item.phoneNumber && (
-              <span className="flex items-center gap-1">
-                <Phone className="size-4" />
+              <span className="flex items-center gap-1.5">
+                <Phone className="w-4 h-4" />
                 {item.phoneNumber}
               </span>
             )}
           </div>
-          <p className="text-xs text-gray-400 mt-1 flex items-center gap-1">
-            <Calendar className="size-3" />
+          <p className="text-xs text-gray-400 mt-1 flex items-center gap-1.5">
+            <Calendar className="w-3.5 h-3.5" />
             Joined: {formatDate(item.createdAt)}
           </p>
         </div>
@@ -222,40 +250,37 @@ const UserCard = ({ item, setActiveSection, setSelectedUser }) => {
         {/* Dropdown Button */}
         <button
           onClick={handleDropDownClick}
-          className="btn btn-circle btn-ghost ml-2"
+          className="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors flex-shrink-0"
         >
-          <span
-            className={`transition-transform duration-300 ease-in-out ${
-              isDropDownOpen ? 'rotate-180' : 'rotate-0'
-            }`}
-          >
-            <ChevronDown />
-          </span>
+          <ChevronDown className={`w-5 h-5 text-gray-600 transition-transform duration-300 ${
+            isDropDownOpen ? 'rotate-180' : ''
+          }`} />
         </button>
       </div>
 
       {/* Dropdown Actions */}
       <div
         ref={dropdownRef}
-        className="transition-all duration-300 ease-in-out overflow-hidden"
+        className="transition-all duration-300 ease-in-out overflow-hidden border-t border-gray-100"
         style={{
           maxHeight: isDropDownOpen ? `${dropdownHeight}px` : '0px',
           opacity: isDropDownOpen ? 1 : 0,
+          borderTopWidth: isDropDownOpen ? '1px' : '0px',
         }}
       >
-        <div className="flex p-2 gap-2">
+        <div className="flex p-4 gap-3">
           <button
             onClick={() => handleViewDetails(item.id)}
-            className="btn btn-primary m-2 p-2 flex-1 rounded-full"
+            className="flex-1 px-4 py-2.5 bg-primary text-secondary font-semibold rounded-xl hover:bg-primary/90 transition-colors"
           >
             View Details
           </button>
-          {/* <button
+          <button
             onClick={() => handleDelete(item.id)}
-            className="btn btn-outline border-primary border-2 text-primary m-2 p-2 flex-1 rounded-full"
+            className="flex-1 px-4 py-2.5 bg-white text-red-600 font-semibold rounded-xl border-2 border-red-200 hover:bg-red-50 hover:border-red-300 transition-colors"
           >
             Delete
-          </button> */}
+          </button>
         </div>
       </div>
     </div>

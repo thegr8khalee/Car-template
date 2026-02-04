@@ -10,6 +10,7 @@ import {
   AlertTriangle,
   ChevronDown,
   ChevronLeft,
+  ChevronRight,
   Filter
 } from 'lucide-react';
 
@@ -28,6 +29,7 @@ const AdminComments = () => {
   } = useDashboardStore();
 
   const [selectedFilter, setSelectedFilter] = useState('all');
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   useEffect(() => {
     getCommentsStats();
@@ -40,87 +42,143 @@ const AdminComments = () => {
 
   const handleFilterChange = (status) => {
     setSelectedFilter(status);
+    setIsFilterOpen(false);
     getComments({ page: 1, limit: 10, status });
+  };
+
+  const getFilterLabel = () => {
+    if (selectedFilter === 'all') return 'All Comments';
+    return selectedFilter.charAt(0).toUpperCase() + selectedFilter.slice(1);
   };
 
   if (isFetchingComments && !commentsStats) {
     return (
-      <div className="space-y-2">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <Skeleton key={i} height={60} className="w-full" />
-        ))}
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="bg-white rounded-xl border border-gray-100 p-5">
+              <div className="flex items-center justify-between">
+                <div className="space-y-2">
+                  <div className="h-4 w-20 bg-gray-200 rounded animate-pulse" />
+                  <div className="h-8 w-16 bg-gray-200 rounded animate-pulse" />
+                </div>
+                <div className="w-12 h-12 rounded-xl bg-gray-200 animate-pulse" />
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="bg-white rounded-xl border border-gray-100 p-6">
+          <div className="space-y-3">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="h-24 bg-gray-100 rounded-xl animate-pulse" />
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
 
   if (commentError && !commentsStats) {
-    return <div className="text-center py-8 text-error">Error: {commentError}</div>;
+    return (
+      <div className="bg-white rounded-xl border border-gray-100 p-8 text-center">
+        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 flex items-center justify-center">
+          <XCircle className="w-8 h-8 text-red-500" />
+        </div>
+        <p className="text-red-600 font-medium">Error: {commentError}</p>
+      </div>
+    );
   }
 
   return (
     <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+          <MessageSquare className="w-5 h-5 text-primary" />
+        </div>
+        <div>
+          <h1 className="text-xl font-bold text-gray-900">Comment Management</h1>
+          <p className="text-sm text-gray-500">Review and moderate user comments</p>
+        </div>
+      </div>
+
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         <StatCard
           title="Total Comments"
           value={commentsStats?.totalComments || 0}
-          icon={<MessageSquare className="size-6" />}
+          icon={<MessageSquare className="w-5 h-5" />}
           color="bg-blue-500"
         />
         <StatCard
           title="Pending"
           value={commentsStats?.pendingComments || 0}
-          icon={<Clock className="size-6" />}
-          color="bg-yellow-500"
+          icon={<Clock className="w-5 h-5" />}
+          color="bg-amber-500"
         />
         <StatCard
           title="Approved"
           value={commentsStats?.approvedComments || 0}
-          icon={<CheckCircle className="size-6" />}
-          color="bg-green-500"
+          icon={<CheckCircle className="w-5 h-5" />}
+          color="bg-emerald-500"
         />
         <StatCard
           title="Rejected"
           value={commentsStats?.rejectedComments || 0}
-          icon={<XCircle className="size-6" />}
+          icon={<XCircle className="w-5 h-5" />}
           color="bg-red-500"
         />
         <StatCard
           title="Spam"
           value={commentsStats?.spamComments || 0}
-          icon={<AlertTriangle className="size-6" />}
+          icon={<AlertTriangle className="w-5 h-5" />}
           color="bg-orange-500"
         />
       </div>
 
       {/* Comments Section */}
-      <div className="bg-base-200 rounded-lg">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold">Comments</h2>
+      <div className="bg-white rounded-xl border border-gray-100 p-6">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-lg font-semibold text-gray-900">Comments</h2>
           
           {/* Filter Dropdown */}
-          <div className="dropdown dropdown-end">
-            <label tabIndex={0} className="btn btn-outline gap-2">
-              <Filter className="size-4" />
-              {selectedFilter === 'all' ? 'All Comments' : selectedFilter.charAt(0).toUpperCase() + selectedFilter.slice(1)}
-            </label>
-            <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52 mt-2">
-              <li><a onClick={() => handleFilterChange('all')}>All Comments</a></li>
-              <li><a onClick={() => handleFilterChange('pending')}>Pending</a></li>
-              <li><a onClick={() => handleFilterChange('approved')}>Approved</a></li>
-              <li><a onClick={() => handleFilterChange('rejected')}>Rejected</a></li>
-              <li><a onClick={() => handleFilterChange('spam')}>Spam</a></li>
-            </ul>
+          <div className="relative">
+            <button
+              onClick={() => setIsFilterOpen(!isFilterOpen)}
+              className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors font-medium text-gray-700"
+            >
+              <Filter className="w-4 h-4" />
+              {getFilterLabel()}
+              <ChevronDown className={`w-4 h-4 transition-transform ${isFilterOpen ? 'rotate-180' : ''}`} />
+            </button>
+            {isFilterOpen && (
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-10">
+                {['all', 'pending', 'approved', 'rejected', 'spam'].map((status) => (
+                  <button
+                    key={status}
+                    onClick={() => handleFilterChange(status)}
+                    className={`w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors ${
+                      selectedFilter === status ? 'text-primary font-medium' : 'text-gray-700'
+                    }`}
+                  >
+                    {status === 'all' ? 'All Comments' : status.charAt(0).toUpperCase() + status.slice(1)}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
         {/* Comments List */}
         {comments?.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
-            No comments found.
+          <div className="text-center py-12">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+              <MessageSquare className="w-8 h-8 text-gray-400" />
+            </div>
+            <p className="text-gray-500">No comments found.</p>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-3">
             {comments?.map((comment) => (
               <CommentCard key={comment.id} comment={comment} />
             ))}
@@ -129,23 +187,14 @@ const AdminComments = () => {
 
         {/* Pagination */}
         {totalCommentPages > 1 && (
-          <div className="flex items-center justify-center gap-2 mt-4">
-            {totalCommentPages > 3 && currentCommentPage > 3 && (
-              <button
-                onClick={() => handlePageChange(1)}
-                className="btn btn-circle btn-primary btn-sm"
-              >
-                1
-              </button>
-            )}
-            {currentCommentPage > 1 && (
-              <button
-                onClick={() => handlePageChange(currentCommentPage - 1)}
-                className="btn btn-circle btn-primary btn-sm"
-              >
-                <ChevronLeft className="size-4" />
-              </button>
-            )}
+          <div className="flex items-center justify-center gap-2 mt-6 pt-4 border-t border-gray-100">
+            <button
+              onClick={() => handlePageChange(currentCommentPage - 1)}
+              disabled={currentCommentPage === 1}
+              className="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
             {[...Array(totalCommentPages)]
               .map((_, index) => index + 1)
               .filter(
@@ -157,23 +206,22 @@ const AdminComments = () => {
                 <button
                   key={page}
                   onClick={() => handlePageChange(page)}
-                  className={`btn btn-circle btn-sm ${
+                  className={`w-9 h-9 rounded-xl font-medium transition-colors ${
                     page === currentCommentPage
-                      ? 'btn-primary'
-                      : 'bg-gray-200'
+                      ? 'bg-primary text-secondary'
+                      : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
                   }`}
                 >
                   {page}
                 </button>
               ))}
-            {currentCommentPage < totalCommentPages && (
-              <button
-                onClick={() => handlePageChange(currentCommentPage + 1)}
-                className="btn btn-primary btn-sm rounded-full"
-              >
-                Next
-              </button>
-            )}
+            <button
+              onClick={() => handlePageChange(currentCommentPage + 1)}
+              disabled={currentCommentPage === totalCommentPages}
+              className="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
           </div>
         )}
       </div>
@@ -183,13 +231,13 @@ const AdminComments = () => {
 
 const StatCard = ({ title, value, icon, color }) => {
   return (
-    <div className="bg-base-100 rounded-lg p-6 shadow-sm">
+    <div className="bg-white rounded-xl border border-gray-100 p-5 hover:shadow-md transition-all duration-200">
       <div className="flex items-center justify-between">
         <div>
           <p className="text-gray-500 text-sm">{title}</p>
-          <p className="text-3xl font-bold mt-2">{value.toLocaleString()}</p>
+          <p className="text-2xl font-bold text-gray-900 mt-1">{value.toLocaleString()}</p>
         </div>
-        <div className={`${color} text-white p-3 rounded-lg`}>{icon}</div>
+        <div className={`${color} text-white p-3 rounded-xl`}>{icon}</div>
       </div>
     </div>
   );
@@ -232,10 +280,10 @@ const CommentCard = ({ comment }) => {
 
   const getStatusBadge = (status) => {
     const statusConfig = {
-      pending: { text: 'Pending', class: 'badge-warning' },
-      approved: { text: 'Approved', class: 'badge-success' },
-      rejected: { text: 'Rejected', class: 'badge-error' },
-      spam: { text: 'Spam', class: 'badge-ghost' },
+      pending: { text: 'Pending', class: 'bg-amber-100 text-amber-700' },
+      approved: { text: 'Approved', class: 'bg-emerald-100 text-emerald-700' },
+      rejected: { text: 'Rejected', class: 'bg-red-100 text-red-700' },
+      spam: { text: 'Spam', class: 'bg-gray-100 text-gray-600' },
     };
     return statusConfig[status] || statusConfig.pending;
   };
@@ -243,19 +291,19 @@ const CommentCard = ({ comment }) => {
   const statusBadge = getStatusBadge(comment.status);
 
   return (
-    <div className="bg-base-100 rounded-lg shadow-sm">
+    <div className="bg-white rounded-xl border border-gray-100 hover:border-gray-200 transition-all duration-200 overflow-hidden">
       <div className="p-4">
         <div className="flex items-start justify-between mb-2">
           <div className="flex-1">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="font-semibold">{comment.username}</span>
-              <span className={`badge ${statusBadge.class}`}>{statusBadge.text}</span>
+            <div className="flex items-center gap-2 flex-wrap mb-1.5">
+              <span className="font-semibold text-gray-900">{comment.username}</span>
+              <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${statusBadge.class}`}>{statusBadge.text}</span>
               {comment.isEdited && (
-                <span className="text-xs text-gray-500">(edited)</span>
+                <span className="text-xs text-gray-400">(edited)</span>
               )}
             </div>
             <p className="text-sm text-gray-500">
-              on: {comment.blog?.title || 'Unknown Blog'}
+              on: <span className="text-gray-700">{comment.blog?.title || 'Unknown Blog'}</span>
             </p>
             <p className="text-xs text-gray-400 mt-1">
               {formatDate(comment.createdAt)}
@@ -264,62 +312,59 @@ const CommentCard = ({ comment }) => {
           
           <button
             onClick={handleDropDownClick}
-            className="btn btn-circle btn-ghost btn-sm"
+            className="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors flex-shrink-0"
             disabled={isUpdatingComment}
           >
-            <span
-              className={`transition-transform duration-300 ease-in-out ${
-                isDropDownOpen ? 'rotate-180' : 'rotate-0'
-              }`}
-            >
-              <ChevronDown />
-            </span>
+            <ChevronDown className={`w-5 h-5 text-gray-600 transition-transform duration-300 ${
+              isDropDownOpen ? 'rotate-180' : ''
+            }`} />
           </button>
         </div>
 
-        <p className="text-sm mt-2 whitespace-pre-wrap">{comment.content}</p>
+        <p className="text-sm text-gray-700 mt-2 whitespace-pre-wrap">{comment.content}</p>
       </div>
 
       {/* Dropdown Actions */}
       <div
         ref={dropdownRef}
-        className="transition-all duration-300 ease-in-out overflow-hidden"
+        className="transition-all duration-300 ease-in-out overflow-hidden border-t border-gray-100"
         style={{
           maxHeight: isDropDownOpen ? `${dropdownHeight}px` : '0px',
           opacity: isDropDownOpen ? 1 : 0,
+          borderTopWidth: isDropDownOpen ? '1px' : '0px',
         }}
       >
-        <div className="grid grid-cols-2 gap-2 p-4 border-t">
+        <div className="grid grid-cols-2 gap-3 p-4 bg-gray-50">
           <button
             onClick={() => handleStatusChange('approved')}
-            className="btn btn-success btn-sm"
+            className="flex items-center justify-center gap-2 px-3 py-2 bg-emerald-500 text-white font-medium rounded-xl hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             disabled={comment.status === 'approved' || isUpdatingComment}
           >
-            <CheckCircle className="size-4" />
+            <CheckCircle className="w-4 h-4" />
             Approve
           </button>
           <button
             onClick={() => handleStatusChange('rejected')}
-            className="btn btn-error btn-sm"
+            className="flex items-center justify-center gap-2 px-3 py-2 bg-red-500 text-white font-medium rounded-xl hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             disabled={comment.status === 'rejected' || isUpdatingComment}
           >
-            <XCircle className="size-4" />
+            <XCircle className="w-4 h-4" />
             Reject
           </button>
           <button
             onClick={() => handleStatusChange('spam')}
-            className="btn btn-warning btn-sm"
+            className="flex items-center justify-center gap-2 px-3 py-2 bg-amber-500 text-white font-medium rounded-xl hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             disabled={comment.status === 'spam' || isUpdatingComment}
           >
-            <AlertTriangle className="size-4" />
+            <AlertTriangle className="w-4 h-4" />
             Mark Spam
           </button>
           <button
             onClick={() => handleStatusChange('pending')}
-            className="btn btn-ghost btn-sm"
+            className="flex items-center justify-center gap-2 px-3 py-2 bg-white text-gray-700 font-medium rounded-xl border border-gray-200 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             disabled={comment.status === 'pending' || isUpdatingComment}
           >
-            <Clock className="size-4" />
+            <Clock className="w-4 h-4" />
             Pending
           </button>
         </div>

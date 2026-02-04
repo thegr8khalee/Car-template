@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import Skeleton from '../Skeleton';
 import {
   Clock,
   CheckCircle,
@@ -8,12 +7,12 @@ import {
   Filter,
   ChevronDown,
   ChevronLeft,
+  ChevronRight,
   Phone,
   Mail,
   Car,
   Calendar,
   Gauge,
-  Image,
   ImageIcon,
 } from 'lucide-react';
 import { useDashboardStore } from '../../store/useDasboardStore';
@@ -31,6 +30,7 @@ const AdminSellingToUs = () => {
   } = useDashboardStore();
 
   const [selectedFilter, setSelectedFilter] = useState('all');
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   useEffect(() => {
     getSellSubmissionsStats();
@@ -43,106 +43,143 @@ const AdminSellingToUs = () => {
 
   const handleFilterChange = (status) => {
     setSelectedFilter(status);
+    setIsFilterOpen(false);
     getSellSubmissions({ page: 1, limit: 10, status });
+  };
+
+  const getFilterLabel = () => {
+    const labels = {
+      all: 'All Submissions',
+      Pending: 'Pending',
+      'Offer Sent': 'Offers Sent',
+      Accepted: 'Accepted',
+      Rejected: 'Rejected',
+    };
+    return labels[selectedFilter] || 'All Submissions';
   };
 
   if (isFetchingSellSubmissions && !sellSubmissionsStats) {
     return (
-      <div className="space-y-2">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <Skeleton key={i} height={70} className="w-full" />
-        ))}
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="bg-white rounded-xl border border-gray-100 p-5">
+              <div className="flex items-center justify-between">
+                <div className="space-y-2">
+                  <div className="h-4 w-20 bg-gray-200 rounded animate-pulse" />
+                  <div className="h-8 w-16 bg-gray-200 rounded animate-pulse" />
+                </div>
+                <div className="w-12 h-12 rounded-xl bg-gray-200 animate-pulse" />
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="bg-white rounded-xl border border-gray-100 p-6">
+          <div className="space-y-3">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="h-32 bg-gray-100 rounded-xl animate-pulse" />
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
 
   if (sellSubmissionError && !sellSubmissionsStats) {
     return (
-      <div className="text-center py-8 text-error">
-        Error: {sellSubmissionError}
+      <div className="bg-white rounded-xl border border-gray-100 p-8 text-center">
+        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 flex items-center justify-center">
+          <XCircle className="w-8 h-8 text-red-500" />
+        </div>
+        <p className="text-red-600 font-medium">Error: {sellSubmissionError}</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+          <Car className="w-5 h-5 text-primary" />
+        </div>
+        <div>
+          <h1 className="text-xl font-bold text-gray-900">Sell Submissions</h1>
+          <p className="text-sm text-gray-500">Review car selling requests</p>
+        </div>
+      </div>
+
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <StatCard
           title="Total Submissions"
           value={sellSubmissionsStats?.totalSubmissions || 0}
-          icon={<Car className="size-6" />}
+          icon={<Car className="w-5 h-5" />}
           color="bg-blue-500"
         />
         <StatCard
           title="Pending"
           value={sellSubmissionsStats?.pendingSubmissions || 0}
-          icon={<Clock className="size-6" />}
-          color="bg-yellow-500"
+          icon={<Clock className="w-5 h-5" />}
+          color="bg-amber-500"
         />
         <StatCard
           title="Offers Sent"
           value={sellSubmissionsStats?.offersSent || 0}
-          icon={<Send className="size-6" />}
-          color="bg-green-500"
+          icon={<Send className="w-5 h-5" />}
+          color="bg-emerald-500"
         />
         <StatCard
           title="Accepted"
           value={sellSubmissionsStats?.acceptedOffers || 0}
-          icon={<CheckCircle className="size-6" />}
-          color="bg-emerald-500"
+          icon={<CheckCircle className="w-5 h-5" />}
+          color="bg-teal-500"
         />
       </div>
 
       {/* Submissions Section */}
-      <div className="bg-base-200 rounded-lg p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold">Sell Submissions</h2>
+      <div className="bg-white rounded-xl border border-gray-100 p-6">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-lg font-semibold text-gray-900">Submissions</h2>
 
           {/* Filter Dropdown */}
-          <div className="dropdown dropdown-end">
-            <label tabIndex={0} className="btn btn-outline gap-2">
-              <Filter className="size-4" />
-              {selectedFilter === 'all'
-                ? 'All Submissions'
-                : selectedFilter === 'Pending'
-                ? 'Pending'
-                : selectedFilter === 'Offer Sent'
-                ? 'Offers Sent'
-                : selectedFilter === 'Accepted'
-                ? 'Accepted'
-                : 'Rejected'}
-            </label>
-            <ul
-              tabIndex={0}
-              className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52 mt-2"
+          <div className="relative">
+            <button
+              onClick={() => setIsFilterOpen(!isFilterOpen)}
+              className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors font-medium text-gray-700"
             >
-              <li>
-                <a onClick={() => handleFilterChange('all')}>All Submissions</a>
-              </li>
-              <li>
-                <a onClick={() => handleFilterChange('Pending')}>Pending</a>
-              </li>
-              <li>
-                <a onClick={() => handleFilterChange('Offer Sent')}>Offers Sent</a>
-              </li>
-              <li>
-                <a onClick={() => handleFilterChange('Accepted')}>Accepted</a>
-              </li>
-              <li>
-                <a onClick={() => handleFilterChange('Rejected')}>Rejected</a>
-              </li>
-            </ul>
+              <Filter className="w-4 h-4" />
+              {getFilterLabel()}
+              <ChevronDown className={`w-4 h-4 transition-transform ${isFilterOpen ? 'rotate-180' : ''}`} />
+            </button>
+            {isFilterOpen && (
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-10">
+                {['all', 'Pending', 'Offer Sent', 'Accepted', 'Rejected'].map((status) => (
+                  <button
+                    key={status}
+                    onClick={() => handleFilterChange(status)}
+                    className={`w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors ${
+                      selectedFilter === status ? 'text-primary font-medium' : 'text-gray-700'
+                    }`}
+                  >
+                    {status === 'all' ? 'All Submissions' : status === 'Offer Sent' ? 'Offers Sent' : status}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
         {/* Submissions List */}
         {sellSubmissions?.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
-            No submissions found.
+          <div className="text-center py-12">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+              <Car className="w-8 h-8 text-gray-400" />
+            </div>
+            <p className="text-gray-500">No submissions found.</p>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-3">
             {sellSubmissions?.map((submission) => (
               <SubmissionCard key={submission.id} submission={submission} />
             ))}
@@ -151,23 +188,14 @@ const AdminSellingToUs = () => {
 
         {/* Pagination */}
         {totalSellPages > 1 && (
-          <div className="flex items-center justify-center gap-2 mt-4">
-            {totalSellPages > 3 && currentSellPage > 3 && (
-              <button
-                onClick={() => handlePageChange(1)}
-                className="btn btn-circle btn-primary btn-sm"
-              >
-                1
-              </button>
-            )}
-            {currentSellPage > 1 && (
-              <button
-                onClick={() => handlePageChange(currentSellPage - 1)}
-                className="btn btn-circle btn-primary btn-sm"
-              >
-                <ChevronLeft className="size-4" />
-              </button>
-            )}
+          <div className="flex items-center justify-center gap-2 mt-6 pt-4 border-t border-gray-100">
+            <button
+              onClick={() => handlePageChange(currentSellPage - 1)}
+              disabled={currentSellPage === 1}
+              className="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
             {[...Array(totalSellPages)]
               .map((_, index) => index + 1)
               .filter(
@@ -178,21 +206,22 @@ const AdminSellingToUs = () => {
                 <button
                   key={page}
                   onClick={() => handlePageChange(page)}
-                  className={`btn btn-circle btn-sm ${
-                    page === currentSellPage ? 'btn-primary' : 'bg-gray-200'
+                  className={`w-9 h-9 rounded-xl font-medium transition-colors ${
+                    page === currentSellPage
+                      ? 'bg-primary text-secondary'
+                      : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
                   }`}
                 >
                   {page}
                 </button>
               ))}
-            {currentSellPage < totalSellPages && (
-              <button
-                onClick={() => handlePageChange(currentSellPage + 1)}
-                className="btn btn-primary btn-sm rounded-full"
-              >
-                Next
-              </button>
-            )}
+            <button
+              onClick={() => handlePageChange(currentSellPage + 1)}
+              disabled={currentSellPage === totalSellPages}
+              className="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
           </div>
         )}
       </div>
@@ -202,13 +231,13 @@ const AdminSellingToUs = () => {
 
 const StatCard = ({ title, value, icon, color }) => {
   return (
-    <div className="bg-base-100 rounded-lg p-6 shadow-sm">
+    <div className="bg-white rounded-xl border border-gray-100 p-5 hover:shadow-md transition-all duration-200">
       <div className="flex items-center justify-between">
         <div>
           <p className="text-gray-500 text-sm">{title}</p>
-          <p className="text-3xl font-bold mt-2">{value.toLocaleString()}</p>
+          <p className="text-2xl font-bold text-gray-900 mt-1">{value.toLocaleString()}</p>
         </div>
-        <div className={`${color} text-white p-3 rounded-lg`}>{icon}</div>
+        <div className={`${color} text-white p-3 rounded-xl`}>{icon}</div>
       </div>
     </div>
   );
@@ -268,10 +297,10 @@ const SubmissionCard = ({ submission }) => {
 
   const getStatusBadge = (status) => {
     const statusConfig = {
-      Pending: { text: 'Pending', class: 'badge-warning' },
-      'Offer Sent': { text: 'Offer Sent', class: 'badge-info' },
-      Accepted: { text: 'Accepted', class: 'badge-success' },
-      Rejected: { text: 'Rejected', class: 'badge-error' },
+      Pending: { text: 'Pending', class: 'bg-amber-100 text-amber-700' },
+      'Offer Sent': { text: 'Offer Sent', class: 'bg-blue-100 text-blue-700' },
+      Accepted: { text: 'Accepted', class: 'bg-emerald-100 text-emerald-700' },
+      Rejected: { text: 'Rejected', class: 'bg-red-100 text-red-700' },
     };
     return statusConfig[status] || statusConfig.Pending;
   };
@@ -280,27 +309,27 @@ const SubmissionCard = ({ submission }) => {
   const photos = submission.uploadPhotos || '[]';
 
   return (
-    <div className="bg-base-100 rounded-lg shadow-sm">
+    <div className="bg-white rounded-xl border border-gray-100 hover:border-gray-200 transition-all duration-200 overflow-hidden">
       <div className="p-4">
-        <div className="flex items-start justify-between mb-2">
+        <div className="flex items-start justify-between mb-3">
           <div className="flex-1">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="font-semibold">{submission.fullName}</span>
-              <span className={`badge ${statusBadge.class}`}>
+            <div className="flex items-center gap-2 flex-wrap mb-1.5">
+              <span className="font-semibold text-gray-900">{submission.fullName}</span>
+              <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${statusBadge.class}`}>
                 {statusBadge.text}
               </span>
             </div>
-            <p className="text-sm text-gray-500 flex items-center gap-1">
-              <Car className="size-4" />
+            <p className="text-sm text-gray-500 flex items-center gap-1.5">
+              <Car className="w-4 h-4" />
               {submission.carMake} {submission.carModel} ({submission.yearOfManufacture})
             </p>
-            <div className="flex gap-4 mt-2 text-xs text-gray-500">
-              <span className="flex items-center gap-1">
-                <Phone className="size-3" />
+            <div className="flex flex-wrap gap-4 mt-2 text-xs text-gray-500">
+              <span className="flex items-center gap-1.5">
+                <Phone className="w-3.5 h-3.5" />
                 {submission.phoneNumber}
               </span>
-              <span className="flex items-center gap-1">
-                <Mail className="size-3" />
+              <span className="flex items-center gap-1.5">
+                <Mail className="w-3.5 h-3.5" />
                 {submission.emailAddress}
               </span>
             </div>
@@ -311,62 +340,58 @@ const SubmissionCard = ({ submission }) => {
 
           <button
             onClick={handleDropDownClick}
-            className="btn btn-circle btn-ghost btn-sm"
+            className="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors flex-shrink-0"
             disabled={isUpdatingSellSubmission}
           >
-            <span
-              className={`transition-transform duration-300 ease-in-out ${
-                isDropDownOpen ? 'rotate-180' : 'rotate-0'
-              }`}
-            >
-              <ChevronDown />
-            </span>
+            <ChevronDown className={`w-5 h-5 text-gray-600 transition-transform duration-300 ${
+              isDropDownOpen ? 'rotate-180' : ''
+            }`} />
           </button>
         </div>
 
         {/* Car Details */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 my-3 p-3 bg-base-200 rounded-lg">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 my-3 p-3 bg-gray-50 rounded-xl">
           <div className="flex items-center gap-2">
-            <Gauge className="size-4 text-gray-500" />
+            <Gauge className="w-4 h-4 text-gray-500" />
             <div>
               <p className="text-xs text-gray-500">Mileage</p>
-              <p className="text-sm font-medium">{submission.mileageKm} km</p>
+              <p className="text-sm font-medium text-gray-900">{submission.mileageKm} km</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Calendar className="size-4 text-gray-500" />
+            <Calendar className="w-4 h-4 text-gray-500" />
             <div>
               <p className="text-xs text-gray-500">Year</p>
-              <p className="text-sm font-medium">{submission.yearOfManufacture}</p>
+              <p className="text-sm font-medium text-gray-900">{submission.yearOfManufacture}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <CheckCircle className="size-4 text-gray-500" />
+            <CheckCircle className="w-4 h-4 text-gray-500" />
             <div>
               <p className="text-xs text-gray-500">Condition</p>
-              <p className="text-sm font-medium">{submission.condition}</p>
+              <p className="text-sm font-medium text-gray-900">{submission.condition}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <ImageIcon className="size-4 text-gray-500" />
+            <ImageIcon className="w-4 h-4 text-gray-500" />
             <div>
               <p className="text-xs text-gray-500">Photos</p>
-              <p className="text-sm font-medium">{photos.length}</p>
+              <p className="text-sm font-medium text-gray-900">{photos.length}</p>
             </div>
           </div>
         </div>
 
         {submission.additionalNotes && (
-          <div className="mt-2 p-3 bg-base-200 rounded-lg">
+          <div className="mt-2 p-3 bg-gray-50 rounded-xl">
             <p className="text-xs text-gray-500 mb-1">Additional Notes:</p>
-            <p className="text-sm">{submission.additionalNotes}</p>
+            <p className="text-sm text-gray-700">{submission.additionalNotes}</p>
           </div>
         )}
 
         {submission.offerAmount && (
-          <div className="mt-2 p-3 bg-success/10 rounded-lg">
+          <div className="mt-3 p-3 bg-emerald-50 rounded-xl border border-emerald-100">
             <p className="text-xs text-gray-500 mb-1">Offer Amount:</p>
-            <p className="text-lg font-bold text-success">
+            <p className="text-lg font-bold text-emerald-600">
               N{parseFloat(submission.offerAmount).toLocaleString()}
             </p>
             {submission.offerSentDate && (
@@ -381,54 +406,55 @@ const SubmissionCard = ({ submission }) => {
       {/* Dropdown Actions */}
       <div
         ref={dropdownRef}
-        className="transition-all duration-300 ease-in-out overflow-hidden"
+        className="transition-all duration-300 ease-in-out overflow-hidden border-t border-gray-100"
         style={{
           maxHeight: isDropDownOpen ? `${dropdownHeight}px` : '0px',
           opacity: isDropDownOpen ? 1 : 0,
+          borderTopWidth: isDropDownOpen ? '1px' : '0px',
         }}
       >
-        <div className="p-4 border-t space-y-3">
+        <div className="p-4 space-y-4 bg-gray-50">
           {/* Send Offer */}
           {submission.offerStatus === 'Pending' && (
-            <div className="flex gap-2">
+            <div className="flex gap-3">
               <input
                 type="number"
                 placeholder="Enter offer amount"
                 value={offerAmount}
                 onChange={(e) => setOfferAmount(e.target.value)}
-                className="input input-bordered flex-1"
+                className="flex-1 px-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
               />
               <button
                 onClick={handleSendOffer}
-                className="btn btn-primary"
+                className="flex items-center gap-2 px-4 py-2.5 bg-primary text-secondary font-semibold rounded-xl hover:bg-primary/90 transition-colors"
                 disabled={isUpdatingSellSubmission}
               >
-                <Send className="size-4" />
+                <Send className="w-4 h-4" />
                 Send Offer
               </button>
             </div>
           )}
 
           {/* Status Actions */}
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-3">
             <button
               onClick={() => handleStatusChange('Accepted')}
-              className="btn btn-success btn-sm"
+              className="flex items-center justify-center gap-2 px-3 py-2.5 bg-emerald-500 text-white font-medium rounded-xl hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               disabled={
                 submission.offerStatus === 'Accepted' || isUpdatingSellSubmission
               }
             >
-              <CheckCircle className="size-4" />
+              <CheckCircle className="w-4 h-4" />
               Accept
             </button>
             <button
               onClick={() => handleStatusChange('Rejected')}
-              className="btn btn-error btn-sm"
+              className="flex items-center justify-center gap-2 px-3 py-2.5 bg-red-500 text-white font-medium rounded-xl hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               disabled={
                 submission.offerStatus === 'Rejected' || isUpdatingSellSubmission
               }
             >
-              <XCircle className="size-4" />
+              <XCircle className="w-4 h-4" />
               Reject
             </button>
           </div>
@@ -436,7 +462,7 @@ const SubmissionCard = ({ submission }) => {
           {/* View Photos */}
           {photos.length > 0 && (
             <div>
-              <p className="text-sm font-medium mb-2">Uploaded Photos:</p>
+              <p className="text-sm font-medium text-gray-700 mb-2">Uploaded Photos:</p>
               <div className="grid grid-cols-4 gap-2">
                 {photos.slice(0, 4).map((photo, index) => (
                   <a

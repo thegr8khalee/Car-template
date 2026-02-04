@@ -1,6 +1,7 @@
 // controllers/sellSubmission.controller.js
 import SellNow from '../models/sell.model.js';
 import { Op } from 'sequelize';
+import { sendEmail } from '../services/gmail.service.js';
 
 // Get sell submissions stats
 export const getSellSubmissionsStats = async (req, res) => {
@@ -110,6 +111,29 @@ export const updateSellSubmissionStatus = async (req, res) => {
     submission.offerStatus = status;
     await submission.save();
 
+    // Send email notification based on status
+    if (['Offer Sent', 'Rejected'].includes(status) && submission.emailAddress) {
+      try {
+        const subject = status === 'Offer Sent' 
+          ? 'An Offer on Your Car Submission' 
+          : 'Update on Your Car Submission';
+        
+        const html = status === 'Offer Sent'
+          ? `<p>Hello ${submission.fullName},</p><p>We have reviewed your car submission (${submission.yearOfManufacture} ${submission.carMake} ${submission.carModel}) and would like to make an offer.</p><p>Please contact us or check the portal for details.</p>`
+          : `<p>Hello ${submission.fullName},</p><p>Thank you for submitting your ${submission.yearOfManufacture} ${submission.carMake} ${submission.carModel}. Unfortunately, we are unable to proceed with your car at this time.</p>`;
+
+        await sendEmail({
+          to: submission.emailAddress,
+          subject,
+          html,
+          text: html.replace(/<[^>]*>?/gm, '')
+        });
+        console.log(`Email notification sent to ${submission.emailAddress} for status ${status}`);
+      } catch (emailError) {
+        console.error('Failed to send email notification:', emailError.message);
+      }
+    }
+
     return res.status(200).json({
       success: true,
       message: `Submission status updated to ${status}`,
@@ -151,12 +175,29 @@ export const sendOffer = async (req, res) => {
     submission.offerSentDate = new Date();
     await submission.save();
 
-    // TODO: Send email to customer with offer details
-    // await sendOfferEmail(submission.emailAddress, {
-    //   name: submission.fullName,
-    //   carDetails: `${submission.carMake} ${submission.carModel} ${submission.yearOfManufacture}`,
-    //   offerAmount: offerAmount
-    // });
+    // Send email to customer with offer details
+    if (submission.emailAddress) {
+      try {
+        const subject = 'We have an offer for your car!';
+        const html = `
+          <p>Hello ${submission.fullName},</p>
+          <p>Great news! We have reviewed your submission for the <strong>${submission.yearOfManufacture} ${submission.carMake} ${submission.carModel}</strong>.</p>
+          <p>We are pleased to offer you <strong>N${parseFloat(offerAmount).toLocaleString()}</strong> for your vehicle.</p>
+          <p>Please log in to your dashboard to accept or reject this offer, or contact us to discuss further.</p>
+          <p>Best regards,<br>Team</p>
+        `;
+
+        await sendEmail({
+          to: submission.emailAddress,
+          subject,
+          html,
+          text: html.replace(/<[^>]*>?/gm, '')
+        });
+        console.log(`Offer email sent to ${submission.emailAddress}`);
+      } catch (emailError) {
+        console.error('Failed to send offer email:', emailError.message);
+      }
+    }
 
     return res.status(200).json({
       success: true,

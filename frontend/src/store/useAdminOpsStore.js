@@ -56,6 +56,20 @@ export const useAdminOpsStore = create((set, get) => ({
     }
   },
 
+  decodeVin: async (vin) => {
+    set({ isLoading: true });
+    try {
+      const res = await axiosInstance.get(`/admin/ops/decode-vin/${vin}`);
+      toast.success('VIN decoded successfully');
+      return res.data;
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to decode VIN');
+      throw error;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
   deleteCar: async (id) => {
     console.log('Deleting car with ID:', id); // Debug log
     set({ isLoading: true });

@@ -15,10 +15,15 @@ const UpdateCarPage = () => {
   console.log('Fetched Car:', car); // Debug log
 
   const [formData, setFormData] = useState({
+    vin: '',
+    stockNumber: '',
     make: '',
     model: '',
     price: '',
-    condition: '',
+    costPrice: '',
+    status: 'available',
+    location: '',
+    reconditioningCost: '',
     msrp: '',
     mileage: '',
     fuelType: '',
@@ -53,9 +58,15 @@ const UpdateCarPage = () => {
         console.log('Data fetched for car ID:', id, data); // Debug log
         if (data) {
           setFormData({
+            vin: data.car.vin || '',
+            stockNumber: data.car.stockNumber || '',
             make: data.car.make || '',
             model: data.car.model || '',
             price: data.car.price || '',
+            costPrice: data.car.costPrice || '',
+            status: data.car.status || 'available',
+            location: data.car.location || '',
+            reconditioningCost: data.car.reconditioningCost || '',
             condition: data.car.condition || '',
             msrp: data.car.msrp || '',
             mileage: data.car.mileage || '',
@@ -129,6 +140,7 @@ const [imagePreview, setImagePreview] = useState([]);
   const [currentStep, setCurrentStep] = useState(1);
 
   // Form options
+  const statusOptions = ['available', 'reserved', 'sold', 'maintenance'];
   const fuelTypeOptions = [
     'gasoline',
     'diesel',
@@ -233,6 +245,8 @@ const [imagePreview, setImagePreview] = useState([]);
         comfort: customFeatures.comfort,
         safety: customFeatures.safety,
         price: parseFloat(formData.price),
+        costPrice: formData.costPrice ? parseFloat(formData.costPrice) : null,
+        reconditioningCost: formData.reconditioningCost ? parseFloat(formData.reconditioningCost) : null,
         msrp: formData.msrp ? parseFloat(formData.msrp) : null,
         mileage: parseInt(formData.mileage),
         year: parseInt(formData.year),
@@ -287,13 +301,13 @@ const [imagePreview, setImagePreview] = useState([]);
   const steps = [
     {
       id: 1,
-      title: 'Basic Info',
-      fields: ['make', 'model', 'year', 'price', 'condition', 'category'],
+      title: 'Identity & Basic Info',
+      fields: ['vin', 'stockNumber', 'make', 'model', 'year', 'price', 'status', 'location', 'condition', 'category'],
     },
     {
       id: 2,
-      title: 'Specifications',
-      fields: ['fuelType', 'transmission', 'bodyType', 'mileage'],
+      title: 'Specifications & Financials',
+      fields: ['fuelType', 'transmission', 'bodyType', 'mileage', 'costPrice', 'reconditioningCost'],
     },
     {
       id: 3,
@@ -321,6 +335,28 @@ const [imagePreview, setImagePreview] = useState([]);
         return (
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="md:col-span-2">
+                 <label className="label font-medium">VIN</label>
+                 <input
+                     type="text"
+                     name="vin"
+                     value={formData.vin}
+                     onChange={handleInputChange}
+                     className="input input-bordered w-full rounded-full"
+                     placeholder="Enter VIN"
+                 />
+              </div>
+              <div>
+                <label className="label font-medium">Stock Number</label>
+                <input
+                  type="text"
+                  name="stockNumber"
+                  value={formData.stockNumber}
+                  onChange={handleInputChange}
+                  className="input input-bordered w-full rounded-full"
+                  placeholder="e.g., STK-12345"
+                />
+              </div>
               <div>
                 <label className="label font-medium">Make *</label>
                 <input
@@ -372,6 +408,32 @@ const [imagePreview, setImagePreview] = useState([]);
                   required
                 />
               </div>
+              <div>
+                <label className="label font-medium">Status</label>
+                <select
+                  name="status"
+                  value={formData.status}
+                  onChange={handleInputChange}
+                  className="select select-bordered w-full rounded-full"
+                >
+                  {statusOptions.map((option) => (
+                    <option key={option} value={option}>
+                      {option.charAt(0).toUpperCase() + option.slice(1)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="label font-medium">Location</label>
+                <input
+                  type="text"
+                  name="location"
+                  value={formData.location}
+                  onChange={handleInputChange}
+                  className="input input-bordered w-full rounded-full"
+                  placeholder="e.g., Showroom A"
+                />
+              </div>
               <div className="md:col-span-2">
                 <label className="label font-medium">Condition *</label>
                 <select
@@ -413,6 +475,35 @@ const [imagePreview, setImagePreview] = useState([]);
       case 2:
         return (
           <div className="space-y-6">
+            <h3 className="text-lg font-semibold">Financials</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="label font-medium">Cost Price</label>
+                <input
+                  type="number"
+                  name="costPrice"
+                  value={formData.costPrice}
+                  onChange={handleInputChange}
+                  className="input input-bordered w-full rounded-full"
+                  placeholder="20000"
+                  step="0.01"
+                />
+              </div>
+              <div>
+                <label className="label font-medium">Reconditioning Cost</label>
+                <input
+                  type="number"
+                  name="reconditioningCost"
+                  value={formData.reconditioningCost}
+                  onChange={handleInputChange}
+                  className="input input-bordered w-full rounded-full"
+                  placeholder="500"
+                  step="0.01"
+                />
+              </div>
+            </div>
+            
+            <h3 className="text-lg font-semibold">Specifications</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="label font-medium">Fuel Type *</label>

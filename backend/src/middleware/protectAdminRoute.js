@@ -14,7 +14,26 @@ export const protectAdminRoute = async (req, res, next) => {
     }
 
     // Verify token with Supabase
-    const { data: { user: supabaseUser }, error } = await supabase.auth.getUser(token);
+    let supabaseUser;
+    let error;
+    
+    // Simple retry mechanism for network glitches
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const result = await supabase.auth.getUser(token);
+        supabaseUser = result.data.user;
+        error = result.error;
+        if (!error && supabaseUser) break; // Success
+        if (error && error.status !== 500 && error.status !== 502 && error.status !== 504) {
+           // If it's a client error (e.g. invalid token), don't retry
+           break;
+        }
+      } catch (err) {
+        // Network errors or other exceptions
+        console.warn(`Supabase auth check failed (attempt ${attempt + 1}/2):`, err.message);
+        if (attempt === 0) await new Promise(r => setTimeout(r, 500)); // Short delay
+      }
+    }
 
     if (error || !supabaseUser) {
       return res.status(401).json({

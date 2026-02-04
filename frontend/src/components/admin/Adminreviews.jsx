@@ -10,6 +10,7 @@ import {
   AlertTriangle,
   ChevronDown,
   ChevronLeft,
+  ChevronRight,
   Filter,
   Car as CarIcon,
 } from 'lucide-react';
@@ -46,60 +47,97 @@ const AdminReviews = () => {
 
   if (isFetchingReviews && !reviewsStats) {
     return (
-      <div className="space-y-2">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <Skeleton key={i} height={60} className="w-full" />
-        ))}
+      <div className="space-y-6 animate-pulse">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="bg-white rounded-xl border border-gray-100 p-6">
+              <div className="flex justify-between">
+                <div className="space-y-2">
+                  <div className="h-4 bg-gray-200 rounded w-20"></div>
+                  <div className="h-8 bg-gray-200 rounded w-16"></div>
+                </div>
+                <div className="w-12 h-12 bg-gray-200 rounded-xl"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="bg-white rounded-xl border border-gray-100 p-6">
+          <div className="h-5 bg-gray-200 rounded w-40 mb-4"></div>
+          <div className="space-y-3">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="h-20 bg-gray-200 rounded-xl"></div>
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
 
   if (reviewError && !reviewsStats) {
     return (
-      <div className="text-center py-8 text-error">Error: {reviewError}</div>
+      <div className="flex items-center gap-4 p-5 bg-red-50 border border-red-200 rounded-2xl">
+        <div className="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0">
+          <Star className="w-6 h-6 text-red-500" />
+        </div>
+        <div className="flex-1">
+          <p className="font-semibold text-red-700">Error loading reviews</p>
+          <p className="text-sm text-red-600">{reviewError}</p>
+        </div>
+      </div>
     );
   }
 
   return (
     <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center gap-3 mb-2">
+        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+          <Star className="w-5 h-5 text-primary" />
+        </div>
+        <div>
+          <h2 className="text-lg font-bold text-gray-900">Review Management</h2>
+          <p className="text-sm text-gray-500">Moderate customer reviews</p>
+        </div>
+      </div>
+
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <StatCard
           title="Total Reviews"
           value={reviewsStats?.totalReviews || 0}
-          icon={<Star className="size-6" />}
-          color="bg-blue-500"
+          icon={<Star className="w-5 h-5" />}
+          color="bg-blue-100 text-blue-600"
         />
         <StatCard
           title="Pending"
           value={reviewsStats?.pendingReviews || 0}
-          icon={<Clock className="size-6" />}
-          color="bg-yellow-500"
+          icon={<Clock className="w-5 h-5" />}
+          color="bg-amber-100 text-amber-600"
         />
         <StatCard
           title="Approved"
           value={reviewsStats?.approvedReviews || 0}
-          icon={<CheckCircle className="size-6" />}
-          color="bg-green-500"
+          icon={<CheckCircle className="w-5 h-5" />}
+          color="bg-emerald-100 text-emerald-600"
         />
         <StatCard
           title="Rejected"
           value={reviewsStats?.rejectedReviews || 0}
-          icon={<XCircle className="size-6" />}
-          color="bg-red-500"
+          icon={<XCircle className="w-5 h-5" />}
+          color="bg-red-100 text-red-600"
         />
         <StatCard
           title="Spam"
           value={reviewsStats?.spamReviews || 0}
-          icon={<AlertTriangle className="size-6" />}
-          color="bg-orange-500"
+          icon={<AlertTriangle className="w-5 h-5" />}
+          color="bg-orange-100 text-orange-600"
         />
       </div>
 
       {/* Average Ratings */}
       {reviewsStats?.averageRatings && (
-        <div className="bg-base-100 rounded-lg p-6 shadow-sm">
-          <h3 className="font-semibold text-lg mb-4">
+        <div className="bg-white rounded-xl border border-gray-100 p-6">
+          <h3 className="font-semibold text-gray-900 mb-4">
             Average Ratings (Approved)
           </h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -124,37 +162,38 @@ const AdminReviews = () => {
       )}
 
       {/* Reviews Section */}
-      <div className="bg-base-200 rounded-lg">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold">Reviews</h2>
+      <div className="bg-white rounded-xl border border-gray-100 p-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <h2 className="text-lg font-bold text-gray-900">Reviews</h2>
 
           {/* Filter Dropdown */}
           <div className="dropdown dropdown-end">
-            <label tabIndex={0} className="btn btn-outline gap-2">
-              <Filter className="size-4" />
+            <label tabIndex={0} className="inline-flex items-center gap-2 px-4 py-2.5 bg-gray-100 text-gray-700 font-medium rounded-xl cursor-pointer hover:bg-gray-200 transition-colors">
+              <Filter className="w-4 h-4" />
               {selectedFilter === 'all'
                 ? 'All Reviews'
                 : selectedFilter.charAt(0).toUpperCase() +
                   selectedFilter.slice(1)}
+              <ChevronDown className="w-4 h-4" />
             </label>
             <ul
               tabIndex={0}
-              className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52 mt-2"
+              className="dropdown-content z-[1] menu p-2 shadow-lg bg-white rounded-xl w-52 mt-2 border border-gray-100"
             >
               <li>
-                <a onClick={() => handleFilterChange('all')}>All Reviews</a>
+                <a onClick={() => handleFilterChange('all')} className="rounded-lg">All Reviews</a>
               </li>
               <li>
-                <a onClick={() => handleFilterChange('pending')}>Pending</a>
+                <a onClick={() => handleFilterChange('pending')} className="rounded-lg">Pending</a>
               </li>
               <li>
-                <a onClick={() => handleFilterChange('approved')}>Approved</a>
+                <a onClick={() => handleFilterChange('approved')} className="rounded-lg">Approved</a>
               </li>
               <li>
-                <a onClick={() => handleFilterChange('rejected')}>Rejected</a>
+                <a onClick={() => handleFilterChange('rejected')} className="rounded-lg">Rejected</a>
               </li>
               <li>
-                <a onClick={() => handleFilterChange('spam')}>Spam</a>
+                <a onClick={() => handleFilterChange('spam')} className="rounded-lg">Spam</a>
               </li>
             </ul>
           </div>
@@ -162,11 +201,15 @@ const AdminReviews = () => {
 
         {/* Reviews List */}
         {reviews?.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
-            No reviews found.
+          <div className="text-center py-16">
+            <div className="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
+              <Star className="w-8 h-8 text-gray-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">No reviews found</h3>
+            <p className="text-gray-500">No reviews match your current filter.</p>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-3 max-h-[50vh] overflow-y-auto pr-2">
             {reviews?.map((review) => (
               <ReviewCard key={review.id} review={review} />
             ))}
@@ -175,21 +218,13 @@ const AdminReviews = () => {
 
         {/* Pagination */}
         {totalReviewPages > 1 && (
-          <div className="flex items-center justify-center gap-2 mt-4">
-            {totalReviewPages > 3 && currentReviewPage > 3 && (
-              <button
-                onClick={() => handlePageChange(1)}
-                className="btn btn-circle btn-primary btn-sm"
-              >
-                1
-              </button>
-            )}
+          <div className="flex items-center justify-center gap-2 mt-6 pt-4 border-t border-gray-100">
             {currentReviewPage > 1 && (
               <button
                 onClick={() => handlePageChange(currentReviewPage - 1)}
-                className="btn btn-circle btn-primary btn-sm"
+                className="w-10 h-10 rounded-xl bg-white border border-gray-200 flex items-center justify-center hover:border-primary hover:text-primary transition-colors"
               >
-                <ChevronLeft className="size-4" />
+                <ChevronLeft className="w-5 h-5" />
               </button>
             )}
             {[...Array(totalReviewPages)]
@@ -202,8 +237,10 @@ const AdminReviews = () => {
                 <button
                   key={page}
                   onClick={() => handlePageChange(page)}
-                  className={`btn btn-circle btn-sm ${
-                    page === currentReviewPage ? 'btn-primary' : 'bg-gray-200'
+                  className={`w-10 h-10 rounded-xl font-medium transition-colors ${
+                    page === currentReviewPage
+                      ? 'bg-primary text-secondary'
+                      : 'bg-white border border-gray-200 text-gray-600 hover:border-primary hover:text-primary'
                   }`}
                 >
                   {page}
@@ -212,9 +249,10 @@ const AdminReviews = () => {
             {currentReviewPage < totalReviewPages && (
               <button
                 onClick={() => handlePageChange(currentReviewPage + 1)}
-                className="btn btn-primary btn-sm rounded-full"
+                className="h-10 px-4 rounded-xl bg-primary text-secondary font-medium flex items-center gap-2 hover:bg-primary/90 transition-colors"
               >
                 Next
+                <ChevronRight className="w-4 h-4" />
               </button>
             )}
           </div>
@@ -226,13 +264,13 @@ const AdminReviews = () => {
 
 const StatCard = ({ title, value, icon, color }) => {
   return (
-    <div className="bg-base-100 rounded-lg p-6 shadow-sm">
+    <div className="bg-white rounded-xl border border-gray-100 p-5 hover:border-gray-200 hover:shadow-md transition-all duration-200">
       <div className="flex items-center justify-between">
         <div>
           <p className="text-gray-500 text-sm">{title}</p>
-          <p className="text-3xl font-bold mt-2">{value.toLocaleString()}</p>
+          <p className="text-2xl font-bold text-gray-900 mt-1">{value.toLocaleString()}</p>
         </div>
-        <div className={`${color} text-white p-3 rounded-lg`}>{icon}</div>
+        <div className={`${color} p-3 rounded-xl`}>{icon}</div>
       </div>
     </div>
   );
@@ -240,11 +278,11 @@ const StatCard = ({ title, value, icon, color }) => {
 
 const RatingItem = ({ label, value }) => {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-xl">
       <span className="text-sm text-gray-600">{label}:</span>
       <div className="flex items-center gap-1">
-        <Star className="size-4 fill-primary text-primary" />
-        <span className="font-semibold">{value}</span>
+        <Star className="w-4 h-4 fill-primary text-primary" />
+        <span className="font-semibold text-gray-900">{value}</span>
       </div>
     </div>
   );
@@ -287,10 +325,10 @@ const ReviewCard = ({ review }) => {
 
   const getStatusBadge = (status) => {
     const statusConfig = {
-      pending: { text: 'Pending', class: 'badge-warning' },
-      approved: { text: 'Approved', class: 'badge-success' },
-      rejected: { text: 'Rejected', class: 'badge-error' },
-      spam: { text: 'Spam', class: 'badge-ghost' },
+      pending: { text: 'Pending', class: 'bg-amber-100 text-amber-700' },
+      approved: { text: 'Approved', class: 'bg-emerald-100 text-emerald-700' },
+      rejected: { text: 'Rejected', class: 'bg-red-100 text-red-700' },
+      spam: { text: 'Spam', class: 'bg-gray-100 text-gray-600' },
     };
     return statusConfig[status] || statusConfig.pending;
   };
@@ -298,23 +336,23 @@ const ReviewCard = ({ review }) => {
   const statusBadge = getStatusBadge(review.status);
 
   return (
-    <div className="bg-base-100 rounded-lg shadow-sm">
+    <div className="bg-white rounded-xl border border-gray-100 hover:border-gray-200 transition-all duration-200 overflow-hidden">
       <div className="p-4">
-        <div className="flex items-start justify-between mb-2">
+        <div className="flex items-start justify-between mb-3">
           <div className="flex-1">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="font-semibold">
+            <div className="flex items-center gap-2 flex-wrap mb-1.5">
+              <span className="font-semibold text-gray-900">
                 {review.name || review.user?.username}
               </span>
-              <span className={`badge ${statusBadge.class}`}>
+              <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${statusBadge.class}`}>
                 {statusBadge.text}
               </span>
               {review.isEdited && (
-                <span className="text-xs text-gray-500">(edited)</span>
+                <span className="text-xs text-gray-400">(edited)</span>
               )}
             </div>
-            <p className="text-sm text-gray-500 flex items-center gap-1">
-              <CarIcon className="size-4" />
+            <p className="text-sm text-gray-500 flex items-center gap-1.5">
+              <CarIcon className="w-4 h-4" />
               {review.car
                 ? `${review.car.make} ${review.car.model} ${review.car.year}`
                 : 'Unknown Car'}
@@ -326,16 +364,12 @@ const ReviewCard = ({ review }) => {
 
           <button
             onClick={handleDropDownClick}
-            className="btn btn-circle btn-ghost btn-sm"
+            className="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors flex-shrink-0"
             disabled={isUpdatingReview}
           >
-            <span
-              className={`transition-transform duration-300 ease-in-out ${
-                isDropDownOpen ? 'rotate-180' : 'rotate-0'
-              }`}
-            >
-              <ChevronDown />
-            </span>
+            <ChevronDown className={`w-5 h-5 text-gray-600 transition-transform duration-300 ${
+              isDropDownOpen ? 'rotate-180' : ''
+            }`} />
           </button>
         </div>
 
@@ -358,49 +392,50 @@ const ReviewCard = ({ review }) => {
           )}
         </div>
 
-        <p className="text-sm mt-2 whitespace-pre-wrap">{review.content}</p>
+        <p className="text-sm text-gray-700 mt-2 whitespace-pre-wrap">{review.content}</p>
       </div>
 
       {/* Dropdown Actions */}
       <div
         ref={dropdownRef}
-        className="transition-all duration-300 ease-in-out overflow-hidden"
+        className="transition-all duration-300 ease-in-out overflow-hidden border-t border-gray-100"
         style={{
           maxHeight: isDropDownOpen ? `${dropdownHeight}px` : '0px',
           opacity: isDropDownOpen ? 1 : 0,
+          borderTopWidth: isDropDownOpen ? '1px' : '0px',
         }}
       >
-        <div className="grid grid-cols-2 gap-2 p-4 border-t">
+        <div className="grid grid-cols-2 gap-3 p-4 bg-gray-50">
           <button
             onClick={() => handleStatusChange('approved')}
-            className="btn btn-success btn-sm"
+            className="flex items-center justify-center gap-2 px-3 py-2 bg-emerald-500 text-white font-medium rounded-xl hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             disabled={review.status === 'approved' || isUpdatingReview}
           >
-            <CheckCircle className="size-4" />
+            <CheckCircle className="w-4 h-4" />
             Approve
           </button>
           <button
             onClick={() => handleStatusChange('rejected')}
-            className="btn btn-error btn-sm"
+            className="flex items-center justify-center gap-2 px-3 py-2 bg-red-500 text-white font-medium rounded-xl hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             disabled={review.status === 'rejected' || isUpdatingReview}
           >
-            <XCircle className="size-4" />
+            <XCircle className="w-4 h-4" />
             Reject
           </button>
           <button
             onClick={() => handleStatusChange('spam')}
-            className="btn btn-warning btn-sm"
+            className="flex items-center justify-center gap-2 px-3 py-2 bg-amber-500 text-white font-medium rounded-xl hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             disabled={review.status === 'spam' || isUpdatingReview}
           >
-            <AlertTriangle className="size-4" />
+            <AlertTriangle className="w-4 h-4" />
             Mark Spam
           </button>
           <button
             onClick={() => handleStatusChange('pending')}
-            className="btn btn-ghost btn-sm"
+            className="flex items-center justify-center gap-2 px-3 py-2 bg-white text-gray-700 font-medium rounded-xl border border-gray-200 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             disabled={review.status === 'pending' || isUpdatingReview}
           >
-            <Clock className="size-4" />
+            <Clock className="w-4 h-4" />
             Pending
           </button>
         </div>
@@ -411,13 +446,13 @@ const ReviewCard = ({ review }) => {
 
 const RatingDisplay = ({ label, value }) => {
   return (
-    <div className="flex flex-col">
-      <span className="text-xs text-gray-500">{label}</span>
-      <div className="flex items-center gap-1">
+    <div className="flex flex-col p-2 bg-gray-50 rounded-lg">
+      <span className="text-xs text-gray-500 mb-1">{label}</span>
+      <div className="flex items-center gap-0.5">
         {[...Array(5)].map((_, i) => (
           <Star
             key={i}
-            className={`size-3 ${
+            className={`w-3.5 h-3.5 ${
               i < value ? 'fill-primary text-primary' : 'text-gray-300'
             }`}
           />

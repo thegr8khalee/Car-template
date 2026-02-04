@@ -65,6 +65,7 @@ import sellRoutes from './routes/sell.routes.js';
 import sellSubmissionRoutes from './routes/sellSubmission.routes.js';
 import adminStaffRoutes from './routes/adminStaff.routes.js';
 import broadcastRoutes from './routes/broadcast.routes.js';
+import profitabilityRoutes from './routes/profitability.routes.js';
 import { globalErrorHandler, notFound } from './middleware/error.middleware.js';
 
 app.use('/api/admin/auth', adminRouts);
@@ -74,6 +75,7 @@ app.use('/api/cars', carRoutes);
 app.use('/api/blogs', blogRoutes);
 app.use('/api/interactions', interactRoutes);
 app.use('/api/admin/dashboard', dashboardRoutes);
+app.use('/api/admin/profitability', profitabilityRoutes);
 app.use('/api/sell', sellRoutes);
 app.use('/api/admin/dashboard/sell-submissions', sellSubmissionRoutes);
 app.use('/api/admin/staff', adminStaffRoutes);
@@ -116,6 +118,8 @@ const startServer = async () => {
   }
 };
 
-startServer();
+if (!process.env.VERCEL) {
+  startServer();
+}
 
 export default app;

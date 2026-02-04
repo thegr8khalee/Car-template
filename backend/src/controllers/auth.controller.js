@@ -149,73 +149,85 @@ export const checkAuth = async (req, res) => {
         .json({ message: 'Not authenticated: No token provided.' });
     }
 
-    let decoded;
-    try {
-      decoded = jwt.verify(token, process.env.JWT_SECRET);
-    } catch (jwtError) {
-      res.clearCookie('jwt', {
+    // Verify token with Supabase
+    let supabaseUser;
+    let error;
+
+     // Simple retry mechanism for network glitches
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const result = await supabase.auth.getUser(token);
+        supabaseUser = result.data.user;
+        error = result.error;
+        if (!error && supabaseUser) break; // Success
+        if (error && error.status !== 500 && error.status !== 502 && error.status !== 504) {
+           // If it's a client error (e.g. invalid token), don't retry
+           break;
+        }
+      } catch (err) {
+        // Network errors or other exceptions
+        console.warn(`Supabase auth check failed (attempt ${attempt + 1}/2):`, err.message);
+        if (attempt === 0) await new Promise(r => setTimeout(r, 500)); // Short delay
+      }
+    }
+
+    if (error || !supabaseUser) {
+       res.clearCookie('jwt', {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
       });
-      return res
-        .status(401)
-        .json({ message: 'Not authenticated: Invalid or expired token.' });
+      return res.status(401).json({ message: 'Not authenticated: Invalid token.' });
     }
 
-    let authenticatedEntity = null;
-    let role = decoded.role;
-
-    if (role === 'admin') {
-      // Sequelize equivalent of Mongoose's findById with projection
-      authenticatedEntity = await Admin.findByPk(decoded.userId, {
+    // Check if it's an admin
+    const admin = await Admin.findByPk(supabaseUser.id, {
         attributes: { exclude: ['passwordHash'] },
-      });
-    } else if (role === 'user') {
-      authenticatedEntity = await User.findByPk(decoded.userId, {
-        attributes: { exclude: ['passwordHash'] },
-      });
-    } else {
-      res.clearCookie('jwt', {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
-      });
-      return res
-        .status(401)
-        .json({ message: 'Not authenticated: Invalid role in token.' });
-    }
-
-    if (!authenticatedEntity) {
-      res.clearCookie('jwt', {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
-      });
-      return res.status(401).json({
-        message: 'Not authenticated: User/Admin account not found in database.',
-      });
-    }
-
-    // Respond with authenticated entity's data
-    return res.status(200).json({
-      id: authenticatedEntity.id,
-      username: authenticatedEntity.username,
-      email: authenticatedEntity.email,
-      role: role,
-      ...(role === 'user' && {
-        phoneNumber: authenticatedEntity.phoneNumber,
-      }),
-      avatarUrl: authenticatedEntity.avatar,
-      createdAt: authenticatedEntity.createdAt,
-      updatedAt: authenticatedEntity.updatedAt,
     });
+
+    if (admin) {
+        return res.status(200).json({
+            id: admin.id,
+            username: admin.username,
+            email: admin.email,
+            role: 'admin',
+            avatarUrl: admin.avatar,
+            createdAt: admin.createdAt,
+            updatedAt: admin.updatedAt,
+        });
+    }
+
+    // Check if it's a regular user
+    const user = await User.findByPk(supabaseUser.id, {
+        attributes: { exclude: ['passwordHash'] },
+    });
+
+    if (user) {
+        return res.status(200).json({
+            id: user.id,
+            username: user.username,
+            email: user.email,
+            role: 'user',
+            phoneNumber: user.phoneNumber,
+            avatarUrl: user.avatar,
+            createdAt: user.createdAt,
+            updatedAt: user.updatedAt,
+        });
+    }
+
+    // User authenticated in Supabase but not found in our DBs
+    res.clearCookie('jwt', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
+      });
+    return res.status(401).json({
+        message: 'Not authenticated: Account not found.',
+    });
+
   } catch (error) {
     console.error('Error in checkAuth controller:', error);
     if (res.headersSent) {
-      console.warn(
-        'Headers already sent, cannot send error response from checkAuth catch block.'
-      );
       return;
     }
     return res

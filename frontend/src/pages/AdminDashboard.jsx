@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import AdminDashboardContent from '../components/admin/AdminDashboardContent';
 import AdminSidebar from '../components/admin/AdminSidebar';
-import { PanelLeftOpen } from 'lucide-react';
+import AdminHeader from '../components/admin/AdminHeader';
 import AdminListings from '../components/admin/AdminListings';
 import AdminBlogs from '../components/admin/AdminBlogs';
 import AdminStaff from '../components/admin/AdminStaff';
@@ -12,6 +12,8 @@ import AdminComments from '../components/admin/AdminComments';
 import Adminreviews from '../components/admin/Adminreviews';
 import AdminSellingToUs from '../components/admin/AdminSellingToUs';
 import UserDetailPage from '../components/admin/UserDetailPAge';
+import InventoryProfitabilityDashboard from '../components/admin/InventoryProfitabilityDashboard';
+import AdminAnalytics from '../components/admin/AdminAnalytics';
 
 const AdminDashboard = () => {
   const [activeSection, setActiveSection] = useState('dashboard');
@@ -47,6 +49,8 @@ const AdminDashboard = () => {
         );
       case 'Listings':
         return <AdminListings />;
+      case 'Profitability':
+        return <InventoryProfitabilityDashboard />;
       case 'SellingToUs':
         return <AdminSellingToUs />;
       case 'Blogs':
@@ -61,6 +65,8 @@ const AdminDashboard = () => {
         return <AdminComments />;
       case 'Reviews':
         return <Adminreviews />;
+      case 'Analytics':
+        return <AdminAnalytics />;
       case 'user-profile':
         return <UserDetailPage user={selectedUser} setActiveSection={handleSetActiveSection} />;
       default:
@@ -71,15 +77,17 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="flex h-screen bg-base-300 rounded-none overflow-x-hidden font-inter">
+    <div className="flex h-screen bg-gray-100 overflow-hidden">
+      {/* Overlay for mobile */}
       {isSidebarOpen && (
         <div
-          className="fixed inset-0 bg-black opacity-20 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden"
           onClick={() => setIsSidebarOpen(false)}
           aria-label="Close sidebar"
-        ></div>
+        />
       )}
 
+      {/* Sidebar */}
       <AdminSidebar
         activeSection={activeSection}
         setActiveSection={handleSetActiveSection}
@@ -87,18 +95,19 @@ const AdminDashboard = () => {
         closeSidebar={() => setIsSidebarOpen(false)}
       />
 
-      <div className="w-screen flex-1 sm:p-4 lg:p-8 rounded-none overflow-y-scroll">
-        
-        <button
-          className="btn lg:hidden bg-transparent my-4 btn-circle"
-          onClick={() => setIsSidebarOpen(true)}
-        >
-          <PanelLeftOpen />
-        </button>
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <main className="flex-1 overflow-y-auto p-4 lg:p-6">
+          <AdminHeader 
+            toggleSidebar={() => setIsSidebarOpen(true)}
+            activeSection={activeSection}
+            setActiveSection={handleSetActiveSection}
+          />
 
-        <div className="bg-base-200 p-4 lg:p-6 rounded-2xl shadow-xl overflow-hidden">
-          {renderContent()}
-        </div>
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 lg:p-6 min-h-[calc(100vh-12rem)]">
+            {renderContent()}
+          </div>
+        </main>
       </div>
     </div>
   );

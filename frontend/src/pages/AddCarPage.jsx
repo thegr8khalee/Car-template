@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Upload, X, Plus, Save, ArrowLeft } from 'lucide-react';
+import { Upload, X, Plus, Save, ArrowLeft, Loader } from 'lucide-react';
 import { useAdminOpsStore } from '../store/useAdminOpsStore';
 // import { error } from 'console';
 import ErrorLogger from '../components/ErrorLogger';
@@ -7,17 +7,23 @@ import ErrorLogger from '../components/ErrorLogger';
 
 const AddCarPage = () => {
   const [formData, setFormData] = useState({
+    vin: '',
+    stockNumber: '',
     make: '',
     model: '',
     price: '',
+    costPrice: '',
     condition: '',
+    status: 'available',
+    location: '',
     msrp: '',
+    reconditioningCost: '',
     mileage: '',
     fuelType: '',
     transmission: '',
     year: '',
     bodyType: '',
-  category: '',
+    category: '',
     engineSize: '',
     horsepower: '',
     torque: '',
@@ -42,8 +48,10 @@ const AddCarPage = () => {
   const [imagePreview, setImagePreview] = useState([]);
   //   const [isLoading, setIsLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
+  const [isDecoding, setIsDecoding] = useState(false);
 
   // Form options
+  const statusOptions = ['available', 'reserved', 'sold', 'maintenance'];
   const fuelTypeOptions = [
     'gasoline',
     'diesel',
@@ -93,7 +101,42 @@ const AddCarPage = () => {
     safety: '',
   });
 
-  const { isLoading, addCar, error } = useAdminOpsStore();
+  const { isLoading, addCar, decodeVin, error } = useAdminOpsStore();
+
+  const handleDecodeVin = async () => {
+    if (!formData.vin) return;
+    setIsDecoding(true);
+    try {
+      const response = await decodeVin(formData.vin);
+      // The response structure is { success: true, data: { ... } }
+      const decoded = response?.data;
+      
+      if (decoded) {
+        setFormData(prev => ({
+          ...prev,
+          make: decoded.make || prev.make,
+          model: decoded.model || prev.model,
+          year: decoded.year || prev.year,
+          bodyType: decoded.bodyType ? decoded.bodyType.toLowerCase() : prev.bodyType,
+          fuelType: decoded.fuelType ? decoded.fuelType.toLowerCase() : prev.fuelType,
+          engineSize: decoded.engineSize || prev.engineSize,
+          transmission: decoded.transmission || prev.transmission,
+          drivetrain: decoded.drivetrain || prev.drivetrain,
+        }));
+      }
+    } catch (error) {
+      console.error("Failed to decode", error);
+    } finally {
+      setIsDecoding(false);
+    }
+  };
+
+  const generateStockNumber = () => {
+    const dateStr = new Date().toISOString().slice(2, 10).replace(/-/g, ''); // YYMMDD
+    const random = Math.floor(1000 + Math.random() * 9000);
+    setFormData(prev => ({ ...prev, stockNumber: `STK-${dateStr}-${random}` }));
+  };
+
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -150,6 +193,8 @@ const AddCarPage = () => {
         comfort: customFeatures.comfort,
         safety: customFeatures.safety,
         price: parseFloat(formData.price),
+        costPrice: formData.costPrice ? parseFloat(formData.costPrice) : null,
+        reconditioningCost: formData.reconditioningCost ? parseFloat(formData.reconditioningCost) : null,
         msrp: formData.msrp ? parseFloat(formData.msrp) : null,
         door: formData.door ? parseInt(formData.door) : null,
         cylinder: formData.cylinder ? parseInt(formData.cylinder) : null,
@@ -170,12 +215,18 @@ const AddCarPage = () => {
         horsepower: formData.horsepower ? parseInt(formData.horsepower) : null,
         torque: formData.torque ? parseInt(formData.torque) : null,
       };
-      const success = addCar(carData);
-      if (success.data) {
+      const success = await addCar(carData);
+      if (success && success.data) {
         setFormData({
+          vin: '',
+          stockNumber: '',
           make: '',
           model: '',
           price: '',
+          costPrice: '',
+          status: 'available',
+          location: '',
+          reconditioningCost: '',
           condition: '',
           msrp: '',
           mileage: '',
@@ -222,13 +273,13 @@ const AddCarPage = () => {
   const steps = [
     {
       id: 1,
-      title: 'Basic Info',
-      fields: ['make', 'model', 'year', 'price', 'condition', 'category'],
+      title: 'Identity & Basic Info',
+      fields: ['vin', 'stockNumber', 'make', 'model', 'year', 'price', 'status', 'location', 'condition', 'category'],
     },
     {
       id: 2,
-      title: 'Specifications',
-      fields: ['fuelType', 'transmission', 'bodyType', 'mileage'],
+      title: 'Specifications & Financials',
+      fields: ['fuelType', 'transmission', 'bodyType', 'mileage', 'costPrice', 'reconditioningCost'],
     },
     {
       id: 3,
@@ -256,6 +307,51 @@ const AddCarPage = () => {
         return (
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="md:col-span-2 space-y-2">
+                 <label className="label font-medium">VIN (Vehicle Identification Number)</label>
+                 <div className="flex gap-2">
+                   <input
+                     type="text"
+                     name="vin"
+                     value={formData.vin}
+                     onChange={handleInputChange}
+                     className="input input-bordered w-full rounded-full"
+                     placeholder="Enter VIN to decode"
+                     maxLength={17}
+                   />
+                   <button 
+                     type="button" 
+                     onClick={handleDecodeVin}
+                     disabled={!formData.vin || isDecoding}
+                     className="btn btn-primary rounded-full px-6"
+                   >
+                     {isDecoding ? <Loader className="animate-spin w-5 h-5" /> : 'Decode'}
+                   </button>
+                 </div>
+              </div>
+
+              <div>
+                <label className="label font-medium">Stock Number</label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    name="stockNumber"
+                    value={formData.stockNumber}
+                    onChange={handleInputChange}
+                    className="input input-bordered w-full rounded-full"
+                    placeholder="e.g., STK-12345"
+                  />
+                  <button
+                    type="button"
+                    onClick={generateStockNumber}
+                    className="btn btn-outline rounded-full"
+                    title="Auto Generate"
+                  >
+                    Auto
+                  </button>
+                </div>
+              </div>
+
               <div>
                 <label className="label font-medium">Make *</label>
                 <input
@@ -307,6 +403,32 @@ const AddCarPage = () => {
                   required
                 />
               </div>
+              <div>
+                <label className="label font-medium">Status</label>
+                <select
+                  name="status"
+                  value={formData.status}
+                  onChange={handleInputChange}
+                  className="select select-bordered w-full rounded-full"
+                >
+                  {statusOptions.map((option) => (
+                    <option key={option} value={option}>
+                      {option.charAt(0).toUpperCase() + option.slice(1)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="label font-medium">Location</label>
+                <input
+                  type="text"
+                  name="location"
+                  value={formData.location}
+                  onChange={handleInputChange}
+                  className="input input-bordered w-full rounded-full"
+                  placeholder="e.g., Showroom A"
+                />
+              </div>
               <div className="md:col-span-2">
                 <label className="label font-medium">Condition *</label>
                 <select
@@ -348,6 +470,33 @@ const AddCarPage = () => {
       case 2:
         return (
           <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="label font-medium">Cost Price</label>
+                <input
+                  type="number"
+                  name="costPrice"
+                  value={formData.costPrice}
+                  onChange={handleInputChange}
+                  className="input input-bordered w-full rounded-full"
+                  placeholder="20000"
+                  step="0.01"
+                />
+              </div>
+              <div>
+                <label className="label font-medium">Reconditioning Cost</label>
+                <input
+                  type="number"
+                  name="reconditioningCost"
+                  value={formData.reconditioningCost}
+                  onChange={handleInputChange}
+                  className="input input-bordered w-full rounded-full"
+                  placeholder="500"
+                  step="0.01"
+                />
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="label font-medium">Fuel Type *</label>

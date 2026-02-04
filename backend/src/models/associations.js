@@ -9,6 +9,7 @@ import Comment from './comment.model.js';
 import Newsletter from './news.model.js';
 import Review from './review.model.js';
 import Broadcast from './broadcast.model.js';
+import InventoryLog from './inventoryLog.model.js';
 
 Admin.hasMany(Broadcast, {
   foreignKey: 'sentById',
@@ -19,6 +20,13 @@ Broadcast.belongsTo(Admin, {
   foreignKey: 'sentById',
   as: 'sender',
 });
+
+// Inventory Log Associations
+InventoryLog.belongsTo(Car, { foreignKey: 'carId', as: 'car' });
+Car.hasMany(InventoryLog, { foreignKey: 'carId', as: 'history' });
+
+InventoryLog.belongsTo(Admin, { foreignKey: 'adminId', as: 'admin' });
+Admin.hasMany(InventoryLog, { foreignKey: 'adminId', as: 'actionLogs' });
 
 // Blog associations - Changed alias from 'author' to 'adminAuthor'
 Blog.belongsTo(Admin, {

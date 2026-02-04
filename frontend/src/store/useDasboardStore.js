@@ -66,8 +66,8 @@ export const useDashboardStore = create((set, get) => ({
   sellSubmissionError: null,
   isUpdatingSellSubmission: false,
 
-  getDashboardStats: async () => {
-    set({ isLoading: true, error: null });
+  getDashboardStats: async (suppressLoading = false) => {
+    if (!suppressLoading) set({ isLoading: true, error: null });
     try {
       const res = await axiosInstance.get('admin/dashboard/stats');
 
@@ -84,12 +84,12 @@ export const useDashboardStore = create((set, get) => ({
       toast.error(errorMessage);
       set({ error: errorMessage });
     } finally {
-      set({ isLoading: false });
+      if (!suppressLoading) set({ isLoading: false });
     }
   },
 
-  getCarStats: async () => {
-    set({ isLoading: true, error: null });
+  getCarStats: async (suppressLoading = false) => {
+    if (!suppressLoading) set({ isLoading: true, error: null });
     try {
       const res = await axiosInstance.get('admin/dashboard/cars/stats');
 
@@ -103,12 +103,12 @@ export const useDashboardStore = create((set, get) => ({
       toast.error(errorMessage);
       set({ error: errorMessage });
     } finally {
-      set({ isLoading: false });
+      if (!suppressLoading) set({ isLoading: false });
     }
   },
 
-  getBlogStats: async () => {
-    set({ isLoading: true, error: null });
+  getBlogStats: async (suppressLoading = false) => {
+    if (!suppressLoading) set({ isLoading: true, error: null });
     try {
       const res = await axiosInstance.get('admin/dashboard/blogs/stats');
 
@@ -122,12 +122,12 @@ export const useDashboardStore = create((set, get) => ({
       toast.error(errorMessage);
       set({ error: errorMessage });
     } finally {
-      set({ isLoading: false });
+      if (!suppressLoading) set({ isLoading: false });
     }
   },
 
-  getUserStats: async () => {
-    set({ isLoading: true, error: null });
+  getUserStats: async (suppressLoading = false) => {
+    if (!suppressLoading) set({ isLoading: true, error: null });
     try {
       const res = await axiosInstance.get('admin/dashboard/users/stats');
 
@@ -141,12 +141,12 @@ export const useDashboardStore = create((set, get) => ({
       toast.error(errorMessage);
       set({ error: errorMessage });
     } finally {
-      set({ isLoading: false });
+      if (!suppressLoading) set({ isLoading: false });
     }
   },
 
-  getModerationStats: async () => {
-    set({ isLoading: true, error: null });
+  getModerationStats: async (suppressLoading = false) => {
+    if (!suppressLoading) set({ isLoading: true, error: null });
     try {
       const res = await axiosInstance.get('admin/dashboard/moderation/stats');
 
@@ -161,12 +161,12 @@ export const useDashboardStore = create((set, get) => ({
       toast.error(errorMessage);
       set({ error: errorMessage });
     } finally {
-      set({ isLoading: false });
+      if (!suppressLoading) set({ isLoading: false });
     }
   },
 
-  getRevenueStats: async () => {
-    set({ isLoading: true, error: null });
+  getRevenueStats: async (suppressLoading = false) => {
+    if (!suppressLoading) set({ isLoading: true, error: null });
     try {
       const res = await axiosInstance.get('admin/dashboard/revenue/stats');
 
@@ -180,12 +180,27 @@ export const useDashboardStore = create((set, get) => ({
       toast.error(errorMessage);
       set({ error: errorMessage });
     } finally {
-      set({ isLoading: false });
+      if (!suppressLoading) set({ isLoading: false });
     }
   },
 
-  getRecentActivity: async (params = {}) => {
-    set({ isLoading: true, error: null });
+  getRecentActivity: async (options = {}) => {
+      // Handles both { suppressLoading: bool, params: {} } or existing params handling if needed
+      // But preserving existing signature: async (params = {})
+      // Wait, checking original signature: getRecentActivity: async (params = {})
+      // I'll assume params can contain suppressLoading or I'll add a second arg.
+      // Changing signature to (params = {}, suppressLoading = false)
+
+      // However, caller might call it differently. Let's see original usage.
+      // refreshAllStats calls it as get().getRecentActivity().
+      // I'll change signature to (params = {}, suppressLoading = false)
+      const { params = {}, suppressLoading = false } = options.params ? { ...options, ...options.params } : { params: options, suppressLoading: options.suppressLoading || false };
+      // That's getting complicated.
+      // Let's stick to (params = {}, suppressLoading = false)
+    },
+
+  getRecentActivity: async (params = {}, suppressLoading = false) => {
+    if (!suppressLoading) set({ isLoading: true, error: null });
     try {
       const res = await axiosInstance.get('admin/dashboard/activity/recent', {
         params,
@@ -201,12 +216,12 @@ export const useDashboardStore = create((set, get) => ({
       toast.error(errorMessage);
       set({ error: errorMessage });
     } finally {
-      set({ isLoading: false });
+      if (!suppressLoading) set({ isLoading: false });
     }
   },
 
-  getTopPerformers: async () => {
-    set({ isLoading: true, error: null });
+  getTopPerformers: async (suppressLoading = false) => {
+    if (!suppressLoading) set({ isLoading: true, error: null });
     try {
       const res = await axiosInstance.get('admin/dashboard/performance/top');
 
@@ -220,7 +235,7 @@ export const useDashboardStore = create((set, get) => ({
       toast.error(errorMessage);
       set({ error: errorMessage });
     } finally {
-      set({ isLoading: false });
+      if (!suppressLoading) set({ isLoading: false });
     }
   },
 
@@ -230,23 +245,23 @@ export const useDashboardStore = create((set, get) => ({
     try {
       // Always fetch basic stats
       const promises = [
-        get().getDashboardStats(),
-        get().getModerationStats(),
-        get().getRecentActivity(),
+        get().getDashboardStats(true),
+        get().getModerationStats(true),
+        get().getRecentActivity({}, true),
       ];
 
       // Fetch role-specific stats
       if (adminRole === 'super_admin' || adminRole === 'editor') {
         promises.push(
-          get().getCarStats(),
-          get().getBlogStats(),
-          get().getTopPerformers()
+          get().getCarStats(true),
+          get().getBlogStats(true),
+          get().getTopPerformers(true)
         );
       }
 
       // Super admin only stats
       if (adminRole === 'super_admin') {
-        promises.push(get().getUserStats(), get().getRevenueStats());
+        promises.push(get().getUserStats(true), get().getRevenueStats(true));
       }
 
       await Promise.allSettled(promises);
@@ -446,6 +461,22 @@ export const useDashboardStore = create((set, get) => ({
       });
 
       toast.error(errorMessage);
+    }
+  },
+
+  deleteUser: async (userId) => {
+    set({ isLoading: true });
+    try {
+      await axiosInstance.delete(`admin/dashboard/users/${userId}/delete`);
+      toast.success('User deleted successfully');
+      
+      // Refresh the user list
+      const { getUsers, currentUserPage } = get();
+      getUsers({ page: currentUserPage });
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to delete user');
+    } finally {
+      set({ isLoading: false });
     }
   },
 

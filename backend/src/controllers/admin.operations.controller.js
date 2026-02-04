@@ -1,11 +1,13 @@
 // src/controllers/car.controller.js
 import Car from '../models/car.model.js';
 import Blog from '../models/blog.model.js';
+import InventoryLog from '../models/inventoryLog.model.js'; // Added import
 import { Op } from 'sequelize';
 import cloudinary from '../lib/cloudinary.js';
 import Newsletter from '../models/news.model.js';
 import NewsletterBroadcast from '../models/broadcast.model.js';
 import { sendEmail } from '../services/gmail.service.js';
+import { decodeVin as decodeVinService } from '../services/vin.service.js';
 
 const uploadImagesToCloudinary = async (base64Images) => {
   if (!base64Images || base64Images.length === 0) {
@@ -80,6 +82,12 @@ export const addCar = async (req, res) => {
       trunkCapacity,
       tireSize,
       zeroToHundred,
+      vin,
+      stockNumber,
+      costPrice,
+      reconditioningCost,
+      location,
+      status,
     } = req.body;
 
     console.log('Received car data:', req.body);
@@ -170,7 +178,26 @@ export const addCar = async (req, res) => {
       trunkCapacity,
       tireSize,
       zeroToHundred,
+      vin,
+      stockNumber,
+      costPrice,
+      reconditioningCost,
+      location,
+      status,
     });
+
+    if (req.admin) {
+      try {
+        await InventoryLog.create({
+          carId: newCar.id,
+          adminId: req.admin.id,
+          action: 'CREATE',
+          details: { initialStatus: status || 'available' }
+        });
+      } catch (e) {
+        console.error("Failed to log creation:", e);
+      }
+    }
 
     // Respond with the newly created car object
     res.status(201).json(newCar);
@@ -270,6 +297,36 @@ export const updateCar = async (req, res) => {
     // Save only urls to carData
     carData.imageUrls = imageUrls;
 
+    // --- Audit Logging Start ---
+    const changes = {};
+    const trackedFields = ['price', 'status', 'costPrice', 'location', 'condition', 'sold', 'stockNumber'];
+    
+    trackedFields.forEach(field => {
+       // Check strictly for undefined to allow nulling out fields if sent as null
+       if (carData[field] !== undefined && carData[field] != car[field]) {
+          changes[field] = { old: car[field], new: carData[field] };
+       }
+    });
+
+    if (Object.keys(changes).length > 0 && req.admin) {
+        let action = 'UPDATE';
+        if (changes.status) action = 'STATUS_CHANGE';
+        if (changes.price) action = 'PRICE_CHANGE';
+
+        try {
+          await InventoryLog.create({
+              carId: car.id,
+              adminId: req.admin.id,
+              action: action,
+              details: changes
+          });
+        } catch (logError) {
+          console.error("Failed to create inventory log:", logError);
+          // Don't fail the update if logging fails
+        }
+    }
+    // --- Audit Logging End ---
+
     // Respond with the updated car object
     await car.update(carData);
     res.status(200).json(car);
@@ -303,6 +360,26 @@ export const deleteCar = async (req, res) => {
     res
       .status(500)
       .json({ message: 'Internal Server Error while deleting the car.' });
+  }
+};
+
+export const decodeVin = async (req, res) => {
+  try {
+    const { vin } = req.params;
+
+    if (!vin) {
+      return res.status(400).json({ message: 'VIN is required' });
+    }
+
+    const result = await decodeVinService(vin);
+
+    res.status(200).json(result);
+  } catch (error) {
+    console.error('Error decoding VIN:', error);
+    res.status(400).json({ 
+      success: false, 
+      message: error.message || 'Failed to decode VIN' 
+    });
   }
 };
 
