@@ -33,7 +33,7 @@ const CarCard = ({
   return (
     <Link to={link} className="card rounded-none w-full bg-base-100 min-w-70 shadow-lg my-4">
       <figure>
-        <img src={image} alt={title} className="w-full h-60 object-cover" />
+        <img src={image} alt={title} className="w-full h-60 object-cover" loading="lazy" />
       </figure>
       <div className="px-5 py-4">
         <h2 className="card-title">{title} {year.value}</h2>

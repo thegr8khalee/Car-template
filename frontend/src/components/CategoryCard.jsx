@@ -8,6 +8,7 @@ const CategoryCard = ({ img, label }) => {
         src={img}
         alt={label}
         className="absolute w-full h-full object-cover"
+        loading="lazy"
       />
 
       <h1 className="absolute text-secondary top-4 left-4 text-2xl drop-shadow-3xl  font-montserrat font-light">

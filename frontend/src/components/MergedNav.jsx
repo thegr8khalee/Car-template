@@ -164,7 +164,7 @@ const MergedNav = () => {
                   {isProfileMenuOpen && (
                     <>
                       <motion.div
-                        className="fixed inset-0 z-[70] bg-black/30"
+                        className="fixed inset-0 z-50 bg-black/30"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
@@ -175,7 +175,7 @@ const MergedNav = () => {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -8 }}
                         transition={{ duration: 0.15 }}
-                        className="absolute right-0 top-12 w-72 bg-white rounded-3xl shadow-3xl border border-gray-100 p-5 z-[80]"
+                        className="absolute right-0 top-12 w-72 bg-white rounded-3xl shadow-3xl border border-gray-100 p-5 z-80"
                       >
                         <div className="flex flex-col gap-2">
                           <Link
@@ -206,7 +206,7 @@ const MergedNav = () => {
                   {isMenuOpen && (
                     <>
                       <motion.div
-                        className="fixed inset-0 z-[70] bg-black/30"
+                        className="fixed inset-0 z-70 bg-black/30"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}

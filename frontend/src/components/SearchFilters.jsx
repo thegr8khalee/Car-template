@@ -562,7 +562,7 @@ const SearchFilters = ({ className = '' }) => {
 
   return (
     <>
-      <div ref={containerRef} className={`${className} w-full max-w-5xl bg-white border border-gray-200 rounded-full flex items-center px-1 py-1 relative z-103`}>
+      <div ref={containerRef} className={`${className} w-full max-w-5xl bg-white border border-gray-200 rounded-full flex items-center px-1 py-1 relative z-10`}>
           <button type="button" onClick={() => setIsMobileFiltersOpen(true)} className="md:hidden flex items-center gap-1 px-3 py-2 text-xs font-semibold text-primary bg-primary/10 rounded-full h-12"><Filter className="size-4" />Filters</button>
           <div className="w-full self-stretch flex-1 flex items-center justify-between gap-2 relative">
               <div className="md:hidden w-full h-full px-2">

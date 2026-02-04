@@ -18,6 +18,7 @@ const BlogCard = ({ publisher, date, title, tagline, image, link }) => {
           src={image}
           alt={title}
           className="w-full aspect-video object-cover rounded-2xl"
+          loading="lazy"
         />
       </figure>
       <div className="flex w-full justify-between items-center">

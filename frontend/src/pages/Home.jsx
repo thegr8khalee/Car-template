@@ -1,8 +1,4 @@
 import React, { useEffect, useState } from 'react';
-// eslint-disable-next-line no-unused-vars
-import { motion, AnimatePresence } from 'framer-motion';
-import { Range } from 'react-range';
-import { FaCheckCircle } from 'react-icons/fa';
 import {
   ArrowRight,
   ArrowUpRight,
@@ -12,12 +8,9 @@ import {
   ChevronRight,
   ChevronUp,
   CircleCheck,
-  FilterIcon,
-  MailIcon,
   Star,
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import SearchFilters from '../components/SearchFilters';
 import CarCard from '../components/CarCard';
 import TeamCard from '../components/TeamCard';
 import BlogCard from '../components/BlogCard';
@@ -146,10 +139,6 @@ const Home = () => {
   const selectMake = (make) => {
     navigate('/listings', { state: { make } });
   };
-
-  const [activeTab, setActiveTab] = useState('Latest');
-
-  const tabs = ['Latest Cars', 'Featured Cars', 'Popular Cars'];
 
   const navigate = useNavigate();
 
@@ -456,6 +445,7 @@ const Home = () => {
                 src={blogs[0]?.featuredImage}
                 alt={blogs[0]?.title}
                 className="w-full h-full object-cover rounded-none transition-transform duration-500 hover:scale-[1.02]"
+                loading="lazy"
               />
             </div>
 
@@ -549,7 +539,7 @@ const Home = () => {
                     className={`rounded-xl border border-gray-400 p-1 px-10 flex flex-col items-center text-xs transition cursor-pointer`}
                     onClick={() => selectBodyType(label)}
                   >
-                    <img src={img} alt={label} className={`max-w-20`} />
+                    <img src={img} alt={label} className={`max-w-20`} loading="lazy" />
                     <h1 className={`text-xs`}>{label}</h1>
                   </div>
                 );
@@ -567,6 +557,7 @@ const Home = () => {
                 src={sell}
                 alt="Sell"
                 className="w-full h-full object-cover rounded-2xl"
+                loading="lazy"
               />
             </div>
             <div className="relative z-10 w-[50vw] px-4">
@@ -690,6 +681,7 @@ const Home = () => {
                     src={src}
                     alt={name}
                     className="w-30 md:w-40 h-auto object-contain"
+                    loading="lazy"
                   />
                 </div>
               ))}
@@ -706,21 +698,21 @@ const Home = () => {
             </h1>
             <div className="flex justify-between items-center text-center">
               <div className="flex flex-col space-y-2 items-center my-8  w-full">
-                <img src={discount} alt="discount" className="size-15" />
+                <img src={discount} alt="discount" className="size-15" loading="lazy" />
                 <h1 className="text-white font-medium">
                   Special Financing Offers
                 </h1>
               </div>
               <div className="flex flex-col space-y-2 items-center my-8  w-full">
-                <img src={trusted} alt="trusted" className="size-13" />
+                <img src={trusted} alt="trusted" className="size-13" loading="lazy" />
                 <h1 className="text-white font-medium">Trusted by Thousands</h1>
               </div>
               <div className="flex flex-col space-y-2 items-center my-8  w-full">
-                <img src={price} alt="price" className="size-13" />
+                <img src={price} alt="price" className="size-13" loading="lazy" />
                 <h1 className="text-white font-medium">Competitive Pricing</h1>
               </div>
               <div className="flex flex-col space-y-2 items-center my-8  w-full">
-                <img src={service} alt="service" className="size-13" />
+                <img src={service} alt="service" className="size-13" loading="lazy" />
                 <h1 className="text-white font-medium">Expert Car Service</h1>
               </div>
             </div>
@@ -929,6 +921,7 @@ const Home = () => {
               src={calc}
               alt="Sell"
               className="absolute inset-0 w-full h-full object-cover"
+              loading="lazy"
             />
             <div className="relative max-w-6xl  z-10 h-full w-full p-8 items-center flex justify-end">
               <div className="bg-white max-w-2xl shadow-lg rounded-3xl w-full p-8 items-center justify-center">

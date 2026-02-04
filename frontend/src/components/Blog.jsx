@@ -12,6 +12,7 @@ const Blog = ({ item }) => {
         src={item.featuredImage}
         alt={item.title}
         className="rounded-none aspect-video object-cover mb-4"
+        loading="lazy"
       />
       <div>
         <span className="inline-block px-2 py-1 bg-secondary/10 text-secondary rounded-full google-label-small text-xs">

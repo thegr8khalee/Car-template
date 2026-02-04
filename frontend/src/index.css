@@ -33,6 +33,7 @@ body {
   src: url('/fonts/LogoFont.otf') format('opentype');
   font-weight: normal;
   font-style: normal;
+  font-display: swap;
 }
 
 .btn-primary {
