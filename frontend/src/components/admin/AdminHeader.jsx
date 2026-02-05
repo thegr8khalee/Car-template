@@ -1,5 +1,6 @@
-import React from 'react';
-import { Menu, Bell, LogOut, User, MessageSquare, Star, Car, Search, ChevronDown } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Menu, Bell, LogOut, User, MessageSquare, Star, Car, Search, ChevronDown, MoveRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useUserAuthStore } from '../../store/useUserAuthStore';
 import { useDashboardStore } from '../../store/useDasboardStore';
 
@@ -12,6 +13,61 @@ const AdminHeader = ({ toggleSidebar, activeSection, setActiveSection }) => {
   const pendingSellRequests = dashboardStats?.sellingToUs?.pending || 0;
   
   const totalNotifications = pendingComments + pendingReviews + pendingSellRequests;
+
+  // Search Logic
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showResults, setShowResults] = useState(false);
+  const searchRef = useRef(null);
+  const navigate = useNavigate();
+
+  const searchableItems = [
+    { id: 'dashboard', label: 'Dashboard Overview', type: 'page', section: 'overview' },
+    { id: 'listings', label: 'Vehicle Inventory', type: 'page', section: 'Listings' },
+    { id: 'profitability', label: 'Profitability Analytics', type: 'page', section: 'Profitability' },
+    { id: 'selling', label: 'Sell Requests', type: 'page', section: 'SellingToUs' },
+    { id: 'blogs', label: 'Blog Management', type: 'page', section: 'Blogs' },
+    { id: 'staff', label: 'Staff Management', type: 'page', section: 'Staffs' },
+    { id: 'users', label: 'User Management', type: 'page', section: 'Users' },
+    { id: 'newsletter', label: 'Newsletter', type: 'page', section: 'Newsteller' },
+    { id: 'comments', label: 'Comment Moderation', type: 'page', section: 'Comments' },
+    { id: 'reviews', label: 'Review Management', type: 'page', section: 'Reviews' },
+    { id: 'analytics', label: 'Analytics', type: 'page', section: 'Analytics' },
+    { id: 'add-listing', label: 'Add New Car', type: 'action', path: '/admin/cars/new' },
+    { id: 'add-blog', label: 'Write New Blog', type: 'action', path: '/admin/blogs/new' },
+    { id: 'add-staff', label: 'Add New Staff', type: 'action', path: '/admin/staff/add' },
+    { id: 'check-profit', label: 'Check Profitability', type: 'action', section: 'Profitability' },
+    { id: 'manage-users', label: 'Manage Users', type: 'action', section: 'Users' },
+    { id: 'pending-comments', label: 'View Pending Comments', type: 'action', section: 'Comments' },
+    { id: 'pending-reviews', label: 'View Pending Reviews', type: 'action', section: 'Reviews' },
+    { id: 'pending-requests', label: 'View Sell Requests', type: 'action', section: 'SellingToUs' },
+  ];
+
+  const filteredItems = searchableItems.filter(item => 
+    item.label.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const handleSearchSelect = (item) => {
+    if (item.path) {
+      navigate(item.path);
+    } else {
+      setActiveSection(item.section);
+    }
+    setSearchQuery('');
+    setShowResults(false);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setShowResults(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const getPageTitle = () => {
     const titles = {
@@ -51,13 +107,57 @@ const AdminHeader = ({ toggleSidebar, activeSection, setActiveSection }) => {
           {/* Right: Actions */}
           <div className="flex items-center gap-2 sm:gap-3">
             {/* Search (Desktop) */}
-            <div className="hidden md:flex items-center bg-gray-50 rounded-xl px-4 py-2 border border-gray-200">
-              <Search className="w-4 h-4 text-gray-400" />
-              <input 
-                type="text" 
-                placeholder="Search..." 
-                className="bg-transparent border-none outline-none text-sm ml-2 w-40 placeholder:text-gray-400"
-              />
+            <div className="relative hidden md:block" ref={searchRef}>
+              <div className="flex items-center bg-gray-50 rounded-xl px-4 py-2 border border-gray-200 focus-within:ring-2 focus-within:ring-primary/10">
+                <Search className="w-4 h-4 text-gray-400" />
+                <input 
+                  type="text" 
+                  placeholder="Search pages or actions..." 
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setShowResults(true);
+                  }}
+                  onFocus={() => setShowResults(true)}
+                  className="bg-transparent border-none outline-none text-sm ml-2 w-48 placeholder:text-gray-400"
+                />
+              </div>
+
+              {/* Search Results Dropdown */}
+              {showResults && searchQuery && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                  {filteredItems.length > 0 ? (
+                    <ul className="py-2 max-h-64 overflow-y-auto">
+                      {filteredItems.map(item => (
+                        <li key={item.id}>
+                          <button 
+                            onClick={() => handleSearchSelect(item)}
+                            className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center justify-between group transition-colors"
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className={`p-1.5 rounded-lg ${item.type === 'action' ? 'bg-amber-100' : 'bg-blue-100'}`}>
+                                {item.type === 'action' ? (
+                                  <MoveRight className={`w-3 h-3 ${item.type === 'action' ? 'text-amber-600' : 'text-blue-600'}`} />
+                                ) : (
+                                  <Search className="w-3 h-3 text-blue-600" />
+                                )}
+                              </div>
+                              <div>
+                                <p className="text-sm font-medium text-gray-900 group-hover:text-primary transition-colors">{item.label}</p>
+                                <p className="text-xs text-gray-500 capitalize">{item.type}</p>
+                              </div>
+                            </div>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <div className="p-4 text-center">
+                      <p className="text-sm text-gray-500">No results found for "{searchQuery}"</p>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Notifications */}

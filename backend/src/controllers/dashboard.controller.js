@@ -758,6 +758,17 @@ export const getListings = async (req, res) => {
     if (req.query.condition) where.condition = req.query.condition;
     if (req.query.sold) where.sold = req.query.sold === 'true';
 
+    // Handle generic search
+    if (req.query.search) {
+      const searchTerm = req.query.search.toLowerCase();
+      where[Op.or] = [
+        { make: { [Op.iLike]: `%${searchTerm}%` } },
+        { model: { [Op.iLike]: `%${searchTerm}%` } },
+        // Simple year check if search term is a number
+        ...( !isNaN(searchTerm) ? [{ year: parseInt(searchTerm, 10) }] : [] )
+      ];
+    }
+
     // Handle price range filter
     if (req.query.minPrice || req.query.maxPrice) {
       where.price = {};
@@ -833,8 +844,21 @@ export const getStaffs = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const offset = (page - 1) * limit;
 
+    // Optional: Search parameter
+    const { search } = req.query;
+    const where = {};
+    
+    if (search) {
+      where[Op.or] = [
+        { username: { [Op.iLike]: `%${search}%` } },
+        { email: { [Op.iLike]: `%${search}%` } },
+        { position: { [Op.iLike]: `%${search}%` } }
+      ];
+    }
+
     // 2. Fetch data from the database with pagination
     const { count, rows: staffs } = await Admin.findAndCountAll({
+      where,
       limit: limit,
       offset: offset,
       order: [['createdAt', 'DESC']], // Optionally order by creation date

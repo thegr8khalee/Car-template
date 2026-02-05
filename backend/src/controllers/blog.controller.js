@@ -9,12 +9,22 @@ export const getAllBlogs = async (req, res) => {
     const page = parseInt(req.query.page, 10) || 1;
     const limit = 20;
     const offset = (page - 1) * limit;
+    const { search } = req.query;
+
+    const where = {
+      status: 'published', // Only show published blogs
+    };
+
+    if (search) {
+      where[Op.or] = [
+        { title: { [Op.iLike]: `%${search}%` } },
+        { tagline: { [Op.iLike]: `%${search}%` } },
+      ];
+    }
 
     // Use findAndCountAll to get both the blogs and the total count for pagination metadata
     const { count, rows: blogs } = await Blog.findAndCountAll({
-      where: {
-        status: 'published', // Only show published blogs
-      },
+      where,
       limit,
       offset,
       order: [['publishedAt', 'DESC']], // Order by most recent first

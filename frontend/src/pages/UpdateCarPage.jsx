@@ -94,7 +94,7 @@ const UpdateCarPage = () => {
             tireSize: data.car.tireSize || '',
             zeroToHundred: data.car.zeroToHundred || '',
           });
-          const existingImages = data.imageUrls || [];
+          const existingImages = data.car.imageUrls || [];
           const processedImages = existingImages.map((img) => {
             if (typeof img === 'object') {
               return {

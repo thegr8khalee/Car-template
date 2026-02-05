@@ -2,7 +2,7 @@
 import React, { useEffect } from 'react';
 import Skeleton from '../Skeleton';
 import { useDashboardStore } from '../../store/useDasboardStore';
-import { ChevronDown, ChevronLeft, ChevronRight, User, Calendar, Eye, FileText, Plus, Edit2, Trash2 } from 'lucide-react';
+import { ChevronDown, ChevronLeft, ChevronRight, User, Calendar, Eye, FileText, Plus, Edit2, Trash2, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAdminOpsStore } from '../../store/useAdminOpsStore';
 
@@ -16,6 +16,8 @@ const AdminBlogs = () => {
     blogError,
   } = useDashboardStore();
 
+  const [searchTerm, setSearchTerm] = React.useState('');
+
   console.log(blogs);
 
   useEffect(() => {
@@ -23,61 +25,120 @@ const AdminBlogs = () => {
   }, [getBlogs]);
 
   const handlePageChange = (page) => {
-    const params = { page, limit: 10 };
+    const params = { page, limit: 10, search: searchTerm };
     getBlogs(params);
+  };
+  
+  const handleSearch = (e) => {
+    e.preventDefault();
+    getBlogs({ page: 1, limit: 10, search: searchTerm });
   };
 
   const navigate = useNavigate();
 
-  if (isFetchingBlogs) {
-    return (
-      <div className="space-y-4 animate-pulse">
-        <div className="flex justify-between items-center mb-6">
-          <div className="h-8 bg-gray-200 rounded-lg w-32"></div>
-          <div className="h-11 bg-gray-200 rounded-xl w-40"></div>
-        </div>
-        {Array.from({ length: 5 }).map((_, i) => (
-          <div key={i} className="bg-white rounded-xl border border-gray-100 p-4">
-            <div className="flex items-center gap-4">
-              <div className="w-24 h-18 bg-gray-200 rounded-xl"></div>
-              <div className="flex-1 space-y-2">
-                <div className="h-5 bg-gray-200 rounded w-64"></div>
-                <div className="h-4 bg-gray-200 rounded w-40"></div>
+  const renderContent = () => {
+    if (isFetchingBlogs) {
+      return (
+        <div className="space-y-4 animate-pulse">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="bg-white rounded-xl border border-gray-100 p-4">
+              <div className="flex items-center gap-4">
+                <div className="w-24 h-18 bg-gray-200 rounded-xl"></div>
+                <div className="flex-1 space-y-2">
+                  <div className="h-5 bg-gray-200 rounded w-64"></div>
+                  <div className="h-4 bg-gray-200 rounded w-40"></div>
+                </div>
+                <div className="h-6 bg-gray-200 rounded-full w-20"></div>
               </div>
-              <div className="h-6 bg-gray-200 rounded-full w-20"></div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
+      );
+    }
+    if (blogError) return (
+      <div className="flex items-center gap-4 p-5 bg-red-50 border border-red-200 rounded-2xl">
+        <div className="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0">
+          <FileText className="w-6 h-6 text-red-500" />
+        </div>
+        <div className="flex-1">
+          <p className="font-semibold text-red-700">Error loading blogs</p>
+          <p className="text-sm text-red-600">{blogError}</p>
+        </div>
       </div>
     );
-  }
-  if (blogError) return (
-    <div className="flex items-center gap-4 p-5 bg-red-50 border border-red-200 rounded-2xl">
-      <div className="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0">
-        <FileText className="w-6 h-6 text-red-500" />
+    if (blogs?.length === 0) return (
+      <div className="text-center py-16">
+        <div className="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
+          <FileText className="w-8 h-8 text-gray-400" />
+        </div>
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">No blogs found</h3>
+        <p className="text-gray-500 mb-6">Get started by creating your first blog post.</p>
+        <button 
+          onClick={() => navigate('/admin/blogs/new')}
+          className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-secondary font-semibold rounded-xl hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20"
+        >
+          <Plus className="w-5 h-5" />
+          Create New Blog
+        </button>
       </div>
-      <div className="flex-1">
-        <p className="font-semibold text-red-700">Error loading blogs</p>
-        <p className="text-sm text-red-600">{blogError}</p>
-      </div>
-    </div>
-  );
-  if (blogs?.length === 0) return (
-    <div className="text-center py-16">
-      <div className="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
-        <FileText className="w-8 h-8 text-gray-400" />
-      </div>
-      <h3 className="text-lg font-semibold text-gray-900 mb-2">No blogs found</h3>
-      <p className="text-gray-500 mb-6">Get started by creating your first blog post.</p>
-      <button 
-        onClick={() => navigate('/admin/blogs/new')}
-        className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-secondary font-semibold rounded-xl hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20"
-      >
-        <Plus className="w-5 h-5" />
-        Create New Blog
-      </button>
-    </div>
-  );
+    );
+
+    return (
+      <>
+        {/* Blog List */}
+        <div className="space-y-3 max-h-[65vh] overflow-y-auto pr-2">
+          {blogs.map((blog) => (
+            <BlogCard key={blog.id} item={blog} />
+          ))}
+        </div>
+
+        {/* Pagination */}
+        {totalBlogPages > 1 && (
+          <div className="flex items-center justify-center gap-2 pt-4 border-t border-gray-100">
+            {currentBlogPage > 1 && (
+              <button
+                onClick={() => handlePageChange(currentBlogPage - 1)}
+                className="w-10 h-10 rounded-xl bg-white border border-gray-200 flex items-center justify-center hover:border-primary hover:text-primary transition-colors"
+                type="button"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+            )}
+            {[...Array(totalBlogPages)]
+              .map((_, index) => index + 1)
+              .filter(
+                (page) =>
+                  page >= currentBlogPage - 2 && page <= currentBlogPage + 2,
+              )
+              .map((page) => (
+                <button
+                  key={page}
+                  onClick={() => handlePageChange(page)}
+                  className={`w-10 h-10 rounded-xl font-medium transition-colors ${
+                    page === currentBlogPage
+                      ? 'bg-primary text-secondary'
+                      : 'bg-white border border-gray-200 text-gray-600 hover:border-primary hover:text-primary'
+                  }`}
+                  type="button"
+                >
+                  {page}
+                </button>
+              ))}
+            {currentBlogPage < totalBlogPages && (
+              <button
+                onClick={() => handlePageChange(currentBlogPage + 1)}
+                className="h-10 px-4 rounded-xl bg-primary text-secondary font-medium flex items-center gap-2 hover:bg-primary/90 transition-colors"
+                type="button"
+              >
+                Next
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+        )}
+      </>
+    );    
+  };
 
   return (
     <div className="space-y-4">
@@ -101,54 +162,21 @@ const AdminBlogs = () => {
         </button>
       </div>
 
-      {/* Blog List */}
-      <div className="space-y-3 max-h-[65vh] overflow-y-auto pr-2">
-        {blogs.map((blog) => (
-          <BlogCard key={blog.id} item={blog} />
-        ))}
-      </div>
-
-      {/* Pagination */}
-      {totalBlogPages > 1 && (
-        <div className="flex items-center justify-center gap-2 pt-4 border-t border-gray-100">
-          {currentBlogPage > 1 && (
-            <button
-              onClick={() => handlePageChange(currentBlogPage - 1)}
-              className="w-10 h-10 rounded-xl bg-white border border-gray-200 flex items-center justify-center hover:border-primary hover:text-primary transition-colors"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-          )}
-          {[...Array(totalBlogPages)]
-            .map((_, index) => index + 1)
-            .filter(
-              (page) =>
-                page >= currentBlogPage - 2 && page <= currentBlogPage + 2,
-            )
-            .map((page) => (
-              <button
-                key={page}
-                onClick={() => handlePageChange(page)}
-                className={`w-10 h-10 rounded-xl font-medium transition-colors ${
-                  page === currentBlogPage
-                    ? 'bg-primary text-secondary'
-                    : 'bg-white border border-gray-200 text-gray-600 hover:border-primary hover:text-primary'
-                }`}
-              >
-                {page}
-              </button>
-            ))}
-          {currentBlogPage < totalBlogPages && (
-            <button
-              onClick={() => handlePageChange(currentBlogPage + 1)}
-              className="h-10 px-4 rounded-xl bg-primary text-secondary font-medium flex items-center gap-2 hover:bg-primary/90 transition-colors"
-            >
-              Next
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          )}
+      {/* Search Bar */}
+      <form onSubmit={handleSearch} className="mb-6">
+        <div className="relative">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search blogs by title or tagline..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+          />
         </div>
-      )}
+      </form>
+
+      {renderContent()}
     </div>
   );
 };

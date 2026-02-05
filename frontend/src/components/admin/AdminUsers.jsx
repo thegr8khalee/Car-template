@@ -41,42 +41,103 @@ const AdminUsers = ({ setActiveSection, setSelectedUser }) => {
     getUsers({ page: 1, limit: 10, search: searchTerm });
   };
 
-  if (isFetchingUsers) {
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gray-200 animate-pulse" />
-          <div className="space-y-2">
-            <div className="h-5 w-32 bg-gray-200 rounded animate-pulse" />
-            <div className="h-4 w-48 bg-gray-200 rounded animate-pulse" />
-          </div>
-        </div>
-        <div className="space-y-3">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="bg-white rounded-xl border border-gray-100 p-4">
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-full bg-gray-200 animate-pulse" />
-                <div className="flex-1 space-y-2">
-                  <div className="h-5 w-32 bg-gray-200 rounded animate-pulse" />
-                  <div className="h-4 w-48 bg-gray-200 rounded animate-pulse" />
+  const renderContent = () => {
+    if (isFetchingUsers) {
+      return (
+        <div className="space-y-6">
+          <div className="space-y-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="bg-white rounded-xl border border-gray-100 p-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-full bg-gray-200 animate-pulse" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-5 w-32 bg-gray-200 rounded animate-pulse" />
+                    <div className="h-4 w-48 bg-gray-200 rounded animate-pulse" />
+                  </div>
                 </div>
               </div>
-            </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+  
+    if (userError)
+      return (
+        <div className="bg-white rounded-xl border border-gray-100 p-8 text-center">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 flex items-center justify-center">
+            <XCircle className="w-8 h-8 text-red-500" />
+          </div>
+          <p className="text-red-600 font-medium">Error: {userError}</p>
+        </div>
+      );
+
+    if (users?.length === 0) {
+      return (
+        <div className="bg-white rounded-xl border border-gray-100 p-12 text-center">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+            <UserIcon className="w-8 h-8 text-gray-400" />
+          </div>
+          <p className="text-gray-500">No users found.</p>
+        </div>
+      );
+    }
+
+    return (
+      <>
+        {/* Users List */}
+        <div className="space-y-3 max-h-[60vh] overflow-y-auto">
+          {users?.map((user) => (
+            <UserCard
+              key={user.id}
+              item={user}
+              setActiveSection={setActiveSection}
+              setSelectedUser={setSelectedUser}
+            />
           ))}
         </div>
-      </div>
+
+        {/* Pagination */}
+        {totalUserPages > 1 && (
+          <div className="flex items-center justify-center gap-2 pt-4 border-t border-gray-100">
+            <button
+              onClick={() => handlePageChange(currentUserPage - 1)}
+              disabled={currentUserPage === 1}
+              className="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            {[...Array(totalUserPages)]
+              .map((_, index) => index + 1)
+              .filter(
+                (page) =>
+                  page >= currentUserPage - 2 && page <= currentUserPage + 2
+              )
+              .map((page) => (
+                <button
+                  key={page}
+                  onClick={() => handlePageChange(page)}
+                  className={`w-9 h-9 rounded-xl font-medium transition-colors ${
+                    page === currentUserPage
+                      ? 'bg-primary text-secondary'
+                      : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                  }`}
+                >
+                  {page}
+                </button>
+              ))}
+            <button
+              onClick={() => handlePageChange(currentUserPage + 1)}
+              disabled={currentUserPage === totalUserPages}
+              className="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+      </>
     );
-  }
-  
-  if (userError)
-    return (
-      <div className="bg-white rounded-xl border border-gray-100 p-8 text-center">
-        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 flex items-center justify-center">
-          <XCircle className="w-8 h-8 text-red-500" />
-        </div>
-        <p className="text-red-600 font-medium">Error: {userError}</p>
-      </div>
-    );
+  };
 
   return (
     <div className="space-y-6">
@@ -111,65 +172,7 @@ const AdminUsers = ({ setActiveSection, setSelectedUser }) => {
         </button>
       </form>
 
-      {/* Users List */}
-      <div className="space-y-3 max-h-[60vh] overflow-y-auto">
-        {users?.length === 0 ? (
-          <div className="bg-white rounded-xl border border-gray-100 p-12 text-center">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
-              <UserIcon className="w-8 h-8 text-gray-400" />
-            </div>
-            <p className="text-gray-500">No users found.</p>
-          </div>
-        ) : (
-          users?.map((user) => (
-            <UserCard
-              key={user.id}
-              item={user}
-              setActiveSection={setActiveSection}
-              setSelectedUser={setSelectedUser}
-            />
-          ))
-        )}
-      </div>
-
-      {/* Pagination */}
-      {totalUserPages > 1 && (
-        <div className="flex items-center justify-center gap-2 pt-4 border-t border-gray-100">
-          <button
-            onClick={() => handlePageChange(currentUserPage - 1)}
-            disabled={currentUserPage === 1}
-            className="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </button>
-          {[...Array(totalUserPages)]
-            .map((_, index) => index + 1)
-            .filter(
-              (page) =>
-                page >= currentUserPage - 2 && page <= currentUserPage + 2
-            )
-            .map((page) => (
-              <button
-                key={page}
-                onClick={() => handlePageChange(page)}
-                className={`w-9 h-9 rounded-xl font-medium transition-colors ${
-                  page === currentUserPage
-                    ? 'bg-primary text-secondary'
-                    : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-                }`}
-              >
-                {page}
-              </button>
-            ))}
-          <button
-            onClick={() => handlePageChange(currentUserPage + 1)}
-            disabled={currentUserPage === totalUserPages}
-            className="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            <ChevronRight className="w-4 h-4" />
-          </button>
-        </div>
-      )}
+      {renderContent()}
     </div>
   );
 };

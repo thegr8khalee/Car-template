@@ -233,6 +233,10 @@ export const updateCar = async (req, res) => {
       for (const imageData of images) {
         if (typeof imageData === 'object') {
           if (imageData.url && imageData.public_id && !imageData.isNew) {
+            // Fix: If public_id is just a flag (true), extract real ID from URL
+            if (imageData.public_id === true) {
+              imageData.public_id = extractPublicIdFromUrl(imageData.url);
+            }
             existingImages.push(imageData);
           } else if (
             imageData.url &&

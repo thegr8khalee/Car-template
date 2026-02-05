@@ -2,7 +2,7 @@
 import React, { useEffect } from 'react';
 import Skeleton from '../Skeleton';
 import { useDashboardStore } from '../../store/useDasboardStore';
-import { ChevronDown, ChevronLeft, ChevronRight, UserPlus, Shield, Mail, Users, Edit2, Trash2 } from 'lucide-react';
+import { ChevronDown, ChevronLeft, ChevronRight, UserPlus, Shield, Mail, Users, Edit2, Trash2, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAdminStaffStore } from '../../store/useAdminStaffStore';
 
@@ -16,55 +16,133 @@ const AdminStaff = () => {
     staffError,
   } = useDashboardStore();
 
+  const [searchTerm, setSearchTerm] = React.useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
-    getStaffs(1, 10);
+    getStaffs({ page: 1, limit: 10 });
   }, [getStaffs]);
 
   console.log(staffs);
 
   const handlePageChange = (page) => {
-    getStaffs(page, 10);
+    getStaffs({ page, limit: 10, search: searchTerm });
+  };
+  
+  const handleSearch = (e) => {
+    e.preventDefault();
+    getStaffs({ page: 1, limit: 10, search: searchTerm });
   };
 
   const handleAddStaff = () => {
     navigate('/admin/staff/add');
   };
 
-  if (isFetchingStaffs) {
-    return (
-      <div className="space-y-4 animate-pulse">
-        <div className="flex justify-between items-center mb-6">
-          <div className="h-8 bg-gray-200 rounded-lg w-40"></div>
-          <div className="h-11 bg-gray-200 rounded-xl w-40"></div>
-        </div>
-        {Array.from({ length: 5 }).map((_, i) => (
-          <div key={i} className="bg-white rounded-xl border border-gray-100 p-4">
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 bg-gray-200 rounded-full"></div>
-              <div className="flex-1 space-y-2">
-                <div className="h-5 bg-gray-200 rounded w-40"></div>
-                <div className="h-4 bg-gray-200 rounded w-56"></div>
+  const renderContent = () => {
+    if (isFetchingStaffs) {
+      return (
+        <div className="space-y-4 animate-pulse">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="bg-white rounded-xl border border-gray-100 p-4">
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 bg-gray-200 rounded-full"></div>
+                <div className="flex-1 space-y-2">
+                  <div className="h-5 bg-gray-200 rounded w-40"></div>
+                  <div className="h-4 bg-gray-200 rounded w-56"></div>
+                </div>
+                <div className="h-6 bg-gray-200 rounded-full w-20"></div>
               </div>
-              <div className="h-6 bg-gray-200 rounded-full w-20"></div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
+      );
+    }
+
+    if (staffError) return (
+      <div className="flex items-center gap-4 p-5 bg-red-50 border border-red-200 rounded-2xl">
+        <div className="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0">
+          <Users className="w-6 h-6 text-red-500" />
+        </div>
+        <div className="flex-1">
+          <p className="font-semibold text-red-700">Error loading staff</p>
+          <p className="text-sm text-red-600">{staffError}</p>
+        </div>
       </div>
     );
-  }
-  if (staffError) return (
-    <div className="flex items-center gap-4 p-5 bg-red-50 border border-red-200 rounded-2xl">
-      <div className="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0">
-        <Users className="w-6 h-6 text-red-500" />
-      </div>
-      <div className="flex-1">
-        <p className="font-semibold text-red-700">Error loading staff</p>
-        <p className="text-sm text-red-600">{staffError}</p>
-      </div>
-    </div>
-  );
+
+    if (staffs?.length === 0) {
+      return (
+        <div className="text-center py-16">
+          <div className="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
+            <Users className="w-8 h-8 text-gray-400" />
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">No staff members found</h3>
+          <p className="text-gray-500 mb-6">Start by adding your first team member.</p>
+          <button 
+            onClick={handleAddStaff}
+            className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-secondary font-semibold rounded-xl hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20"
+          >
+            <UserPlus className="w-5 h-5" />
+            Add Staff Member
+          </button>
+        </div>
+      );
+    }
+
+    return (
+      <>
+        {/* Staff List */}
+        <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-2">
+          {staffs?.map((staff) => <StaffCard key={staff.id} item={staff} />)}
+        </div>
+
+        {/* Pagination */}
+        {totalStaffPages > 1 && (
+          <div className="flex items-center justify-center gap-2 pt-4 border-t border-gray-100">
+            {currentStaffPage > 1 && (
+              <button
+                onClick={() => handlePageChange(currentStaffPage - 1)}
+                className="w-10 h-10 rounded-xl bg-white border border-gray-200 flex items-center justify-center hover:border-primary hover:text-primary transition-colors"
+                type="button"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+            )}
+            {[...Array(totalStaffPages)]
+              .map((_, index) => index + 1)
+              .filter(
+                (page) =>
+                  page >= currentStaffPage - 2 && page <= currentStaffPage + 2
+              )
+              .map((page) => (
+                <button
+                  key={page}
+                  onClick={() => handlePageChange(page)}
+                  className={`w-10 h-10 rounded-xl font-medium transition-colors ${
+                    page === currentStaffPage
+                      ? 'bg-primary text-secondary'
+                      : 'bg-white border border-gray-200 text-gray-600 hover:border-primary hover:text-primary'
+                  }`}
+                  type="button"
+                >
+                  {page}
+                </button>
+              ))}
+            {currentStaffPage < totalStaffPages && (
+              <button
+                onClick={() => handlePageChange(currentStaffPage + 1)}
+                className="h-10 px-4 rounded-xl bg-primary text-secondary font-medium flex items-center gap-2 hover:bg-primary/90 transition-colors"
+                type="button"
+              >
+                Next
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+        )}
+      </>
+    );
+  };
 
   return (
     <div className="space-y-4">
@@ -88,69 +166,21 @@ const AdminStaff = () => {
         </button>
       </div>
 
-      {/* Staff List */}
-      <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-2">
-        {staffs?.length === 0 ? (
-          <div className="text-center py-16">
-            <div className="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
-              <Users className="w-8 h-8 text-gray-400" />
-            </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">No staff members found</h3>
-            <p className="text-gray-500 mb-6">Start by adding your first team member.</p>
-            <button 
-              onClick={handleAddStaff}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-secondary font-semibold rounded-xl hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20"
-            >
-              <UserPlus className="w-5 h-5" />
-              Add Staff Member
-            </button>
-          </div>
-        ) : (
-          staffs?.map((staff) => <StaffCard key={staff.id} item={staff} />)
-        )}
-      </div>
-
-      {/* Pagination */}
-      {totalStaffPages > 1 && (
-        <div className="flex items-center justify-center gap-2 pt-4 border-t border-gray-100">
-          {currentStaffPage > 1 && (
-            <button
-              onClick={() => handlePageChange(currentStaffPage - 1)}
-              className="w-10 h-10 rounded-xl bg-white border border-gray-200 flex items-center justify-center hover:border-primary hover:text-primary transition-colors"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-          )}
-          {[...Array(totalStaffPages)]
-            .map((_, index) => index + 1)
-            .filter(
-              (page) =>
-                page >= currentStaffPage - 2 && page <= currentStaffPage + 2
-            )
-            .map((page) => (
-              <button
-                key={page}
-                onClick={() => handlePageChange(page)}
-                className={`w-10 h-10 rounded-xl font-medium transition-colors ${
-                  page === currentStaffPage
-                    ? 'bg-primary text-secondary'
-                    : 'bg-white border border-gray-200 text-gray-600 hover:border-primary hover:text-primary'
-                }`}
-              >
-                {page}
-              </button>
-            ))}
-          {currentStaffPage < totalStaffPages && (
-            <button
-              onClick={() => handlePageChange(currentStaffPage + 1)}
-              className="h-10 px-4 rounded-xl bg-primary text-secondary font-medium flex items-center gap-2 hover:bg-primary/90 transition-colors"
-            >
-              Next
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          )}
+      {/* Search Bar */}
+      <form onSubmit={handleSearch} className="mb-6">
+        <div className="relative">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search staff by username, email or position..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+          />
         </div>
-      )}
+      </form>
+
+      {renderContent()}
     </div>
   );
 };

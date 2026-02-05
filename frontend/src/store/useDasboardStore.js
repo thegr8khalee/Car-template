@@ -333,21 +333,20 @@ export const useDashboardStore = create((set, get) => ({
     set({ error: null });
   },
 
-  getListings: async () => {
+  getListings: async (params = {}) => {
     set({ isFetchingListings: true, listingError: null });
 
     const { currentPage } = get();
 
-    // You can add more filters here based on your UI state
-    const params = {
+    // Merge default params with passed params
+    const queryParams = {
       page: currentPage,
-      limit: 20, // Customize as needed
-      // make: get().makeFilter,
-      // sold: get().soldFilter,
+      limit: 20,
+      ...params,
     };
 
     try {
-      const res = await axiosInstance.get('admin/dashboard/getListings', { params });
+      const res = await axiosInstance.get('admin/dashboard/getListings', { params: queryParams });
 
       set({
         listings: res.data.listings,
@@ -357,7 +356,7 @@ export const useDashboardStore = create((set, get) => ({
         isFetchingListings: false,
       });
 
-      toast.success('Car listings loaded successfully!');
+      // toast.success('Car listings loaded successfully!');
     } catch (error) {
       const errorMessage =
         error.response?.data?.message || 'Failed to fetch listings.';
@@ -401,11 +400,21 @@ export const useDashboardStore = create((set, get) => ({
     }
   },
 
-  getStaffs: async (page, limit = 20) => {
+  getStaffs: async (params = {}) => {
     set({ isFetchingStaffs: true, staffError: null });
     try {
-      const params = { page, limit };
-      const res = await axiosInstance.get('admin/dashboard/getStaffs', { params });
+      // Handle legacy call or object call
+      let queryParams = {};
+      if (typeof params === 'number') {
+          // It was called as getStaffs(page, limit)
+          queryParams = { page: params, limit: 20 }; // default limit if not passed, but wait, previous sig was (page, limit=20)
+          // arguments[1] is not accessible easily here without rest args.
+          // Let's stick to simple params object and fix the caller.
+      } else {
+          queryParams = params;
+      }
+      
+      const res = await axiosInstance.get('admin/dashboard/getStaffs', { params: queryParams });
 
       set({
         staffs: res.data.data.staffs, // FIX: was res.staffs
@@ -415,7 +424,7 @@ export const useDashboardStore = create((set, get) => ({
         isFetchingStaffs: false,
       });
 
-      toast.success('Staffs loaded successfully!');
+      // toast.success('Staffs loaded successfully!');
     } catch (error) {
       const errorMessage =
         error.response?.data?.message || 'Failed to fetch staffs.';
