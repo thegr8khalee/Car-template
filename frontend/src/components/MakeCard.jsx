@@ -1,9 +1,9 @@
 import { ArrowUpRight } from 'lucide-react';
 import React from 'react';
 
-const MakeCard = ({ img, label }) => {
+const MakeCard = ({ img, label, onClick }) => {
   return (
-    <div className="relative aspect-9/12 w-full">
+    <div className="relative aspect-9/12 w-full cursor-pointer" onClick={onClick}>
       <img
         src={img}
         alt={label}

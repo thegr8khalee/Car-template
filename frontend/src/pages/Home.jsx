@@ -140,6 +140,10 @@ const Home = () => {
     navigate('/listings', { state: { make } });
   };
 
+  const selectCategory = (category) => {
+    navigate('/listings', { state: { category } });
+  };
+
   const navigate = useNavigate();
 
   const handleListingsClick = () => {
@@ -255,19 +259,51 @@ const Home = () => {
           </div>
 
           <div className="md:hidden grid grid-cols-2 gap-2">
-            <MakeCard img={benz1} label="Mercedes" />
-            <MakeCard img={bmw1} label="BMW" />
-            <MakeCard img={toyota1} label="Toyota" />
-            <MakeCard img={honda1} label="Honda" />
+            <MakeCard
+              img={benz1}
+              label="Mercedes"
+              onClick={() => selectMake('Mercedes')}
+            />
+            <MakeCard
+              img={bmw1}
+              label="BMW"
+              onClick={() => selectMake('BMW')}
+            />
+            <MakeCard
+              img={toyota1}
+              label="Toyota"
+              onClick={() => selectMake('Toyota')}
+            />
+            <MakeCard
+              img={honda1}
+              label="Honda"
+              onClick={() => selectMake('Honda')}
+            />
           </div>
           <div
             className="hidden md:flex w-full overflow-x-auto flex-nowrap gap-4 snap-x snap-mandatory scrollbar-none"
             style={{ scrollbarWidth: 'none' }}
           >
-            <MakeCard img={benz1} label="Mercedes" />
-            <MakeCard img={bmw1} label="BMW" />
-            <MakeCard img={toyota1} label="Toyota" />
-            <MakeCard img={honda1} label="Honda" />
+            <MakeCard
+              img={benz1}
+              label="Mercedes"
+              onClick={() => selectMake('Mercedes')}
+            />
+            <MakeCard
+              img={bmw1}
+              label="BMW"
+              onClick={() => selectMake('BMW')}
+            />
+            <MakeCard
+              img={toyota1}
+              label="Toyota"
+              onClick={() => selectMake('Toyota')}
+            />
+            <MakeCard
+              img={honda1}
+              label="Honda"
+              onClick={() => selectMake('Honda')}
+            />
           </div>
           <div className="mt-4 w-full flex justify-end">
             <Link to="/makes" className="sm:hidden btn btn-primary rounded-full">
@@ -342,19 +378,51 @@ const Home = () => {
           </div>
 
           <div className="md:hidden grid grid-cols-2 gap-2">
-            <CategoryCard img={luxury} label="Luxury" />
-            <CategoryCard img={comfort} label="Comfort" />
-            <CategoryCard img={sport1} label="Sport" />
-            <CategoryCard img={suv1} label="SUV" />
+            <CategoryCard
+              img={luxury}
+              label="Luxury"
+              onClick={() => selectCategory('Luxury')}
+            />
+            <CategoryCard
+              img={comfort}
+              label="Comfort"
+              onClick={() => selectCategory('Comfort')}
+            />
+            <CategoryCard
+              img={sport1}
+              label="Sport"
+              onClick={() => selectCategory('Sport')}
+            />
+            <CategoryCard
+              img={suv1}
+              label="SUV"
+              onClick={() => selectCategory('SUV')}
+            />
           </div>
           <div
             className="hidden md:flex w-full overflow-x-auto flex-nowrap gap-4 snap-x snap-mandatory scrollbar-none"
             style={{ scrollbarWidth: 'none' }}
           >
-            <CategoryCard img={luxury} label="Luxury" />
-            <CategoryCard img={comfort} label="Comfort" />
-            <CategoryCard img={sport1} label="Sport" />
-            <CategoryCard img={suv1} label="SUV" />
+            <CategoryCard
+              img={luxury}
+              label="Luxury"
+              onClick={() => selectCategory('Luxury')}
+            />
+            <CategoryCard
+              img={comfort}
+              label="Comfort"
+              onClick={() => selectCategory('Comfort')}
+            />
+            <CategoryCard
+              img={sport1}
+              label="Sport"
+              onClick={() => selectCategory('Sport')}
+            />
+            <CategoryCard
+              img={suv1}
+              label="SUV"
+              onClick={() => selectCategory('SUV')}
+            />
           </div>
           <div className="mt-4 w-full flex justify-end">
             <Link to="/categories" className="sm:hidden btn btn-primary rounded-full">
