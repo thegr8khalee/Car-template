@@ -76,6 +76,30 @@ const Home = () => {
     downPayment: '',
   });
 
+  const [vipForm, setVipForm] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    date: '',
+    message: '',
+  });
+  const [isSubmittingVip, setIsSubmittingVip] = useState(false);
+
+  const handleVipSubmit = (e) => {
+    e.preventDefault();
+    if (!vipForm.name || !vipForm.email || !vipForm.date) {
+      toast.error('Please fill in your name, email, and preferred date');
+      return;
+    }
+    setIsSubmittingVip(true);
+    // Simulate submission for demo
+    setTimeout(() => {
+      toast.success('Your VIP showing has been scheduled! We will contact you shortly.');
+      setVipForm({ name: '', email: '', phone: '', date: '', message: '' });
+      setIsSubmittingVip(false);
+    }, 1000);
+  };
+
   const [monthlyPayment, setMonthlyPayment] = useState(null);
 
   const calculateInstallment = () => {
@@ -454,7 +478,7 @@ const Home = () => {
             </div>
 
             <form
-              action=""
+              onSubmit={handleVipSubmit}
               className="mt-4 md:mt-0 border border-white/30 max-w-md my-auto bg-white/10 p-4 py-6 backdrop-blur-sm rounded-2xl"
             >
               <h1 className="text-2xl font-medium font-inter mb-2 text-white">
@@ -463,32 +487,46 @@ const Home = () => {
               <input
                 type="text"
                 placeholder="Enter your name"
+                value={vipForm.name}
+                onChange={(e) => setVipForm({ ...vipForm, name: e.target.value })}
                 className="input input-bordered border-white/30 rounded-xl bg-transparent text-white  w-full mb-4"
+                required
               />
               <input
                 type="email"
                 placeholder="Enter your email"
+                value={vipForm.email}
+                onChange={(e) => setVipForm({ ...vipForm, email: e.target.value })}
                 className="input input-bordered border-white/30 rounded-xl bg-transparent text-white  w-full mb-4"
+                required
               />
               <input
                 type="tel"
                 placeholder="Enter your phone number"
+                value={vipForm.phone}
+                onChange={(e) => setVipForm({ ...vipForm, phone: e.target.value })}
                 className="input input-bordered border-white/30 rounded-xl bg-transparent text-white placeholder:text-gray-400 w-full mb-4"
               />
               <input
                 type="date"
                 placeholder="Preferred Date"
+                value={vipForm.date}
+                onChange={(e) => setVipForm({ ...vipForm, date: e.target.value })}
                 className="input input-bordered border-white/30 rounded-xl bg-transparent text-white placeholder:text-gray-400 w-full mb-4"
+                required
               />
               <textarea
                 placeholder="Enter your message"
+                value={vipForm.message}
+                onChange={(e) => setVipForm({ ...vipForm, message: e.target.value })}
                 className="textarea textarea-bordered border-white/30 rounded-xl bg-transparent text-white placeholder:text-gray-400 w-full mb-4"
               ></textarea>
               <button
                 type="submit"
+                disabled={isSubmittingVip}
                 className="btn btn-primary w-full rounded-xl"
               >
-                Submit
+                {isSubmittingVip ? 'Submitting...' : 'Submit'}
               </button>
             </form>
           </div>

@@ -33,6 +33,8 @@ const EditStaffPage = React.lazy(() => import('./pages/editStaffPage'));
 const NewBroadcastPage = React.lazy(() => import('./pages/newBroadcast'));
 const Makes = React.lazy(() => import('./pages/Makes'));
 const Categories = React.lazy(() => import('./pages/Categories'));
+const About = React.lazy(() => import('./pages/About'));
+const PrivacyPolicy = React.lazy(() => import('./pages/PrivacyPolicy'));
 const EmailVerificationSentPage = React.lazy(() => import('./pages/EmailVerificationSentPage'));
 
 // Loading component
@@ -84,6 +86,8 @@ function App() {
             <Route path="/blogs" element={<Blogs />} />
             <Route path="/blog/:id" element={<BlogDetail />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="/sell" element={<Sell />} />
             <Route path="/sell/form" element={<SellCarPage />} />
 
