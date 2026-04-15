@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import branding from '../config/branding';
 import { motion } from 'framer-motion';
-import { axiosInstance } from '../lib/axios';
 import { Loader2 } from 'lucide-react';
 
 const Contact = () => {
@@ -65,19 +64,11 @@ const Contact = () => {
     setSuccessMessage(null);
     setIsSubmitting(true);
 
-    try {
-      await axiosInstance.post('/interactions/contact', formData);
-      setSuccessMessage("Thanks for reaching out. We'll get back to you shortly.");
-      setFormData({ name: '', email: '', phone: '', message: '' });
-    } catch (error) {
-      const message =
-        error.response?.data?.message ||
-        'Failed to send your message. Please try again or contact us directly.';
-      console.error('Contact form submission failed', error);
-      setErrorMessage(message);
-    } finally {
-      setIsSubmitting(false);
-    }
+    // Simulated submission (demo mode): no network call, always succeeds.
+    await new Promise((resolve) => setTimeout(resolve, 600));
+    setSuccessMessage("Thanks for reaching out. We'll get back to you shortly.");
+    setFormData({ name: '', email: '', phone: '', message: '' });
+    setIsSubmitting(false);
   };
 
   return (

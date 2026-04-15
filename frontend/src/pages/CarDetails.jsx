@@ -36,7 +36,6 @@ import { useCarStore } from '../store/useCarStore';
 import { useEffect } from 'react';
 import Review from '../components/Review';
 import toast from 'react-hot-toast';
-import { useInteractStore } from '../store/useInteractStore';
 import { useUserAuthStore } from '../store/useUserAuthStore';
 import { formatPrice } from '../lib/utils';
 
@@ -130,8 +129,6 @@ const CarDetails = () => {
     return 'Needs Improvement';
   };
 
-  const carId = id;
-
   const Star1 = ({ filled, onClick }) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -146,7 +143,14 @@ const CarDetails = () => {
     </svg>
   );
 
-  const { reviewCar, updateReview } = useInteractStore();
+  // Demo mode: review submission is simulated below — no store calls.
+
+  const handleTestDriveSubmit = async (e) => {
+    e.preventDefault();
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    toast.success('Test drive request received. We will contact you shortly.');
+    setTestDriveFormData({ name: '', email: '', date: '', subject: '', message: '' });
+  };
 
   const [formData, setFormData] = useState({
     exterior: 0,
@@ -183,44 +187,31 @@ const CarDetails = () => {
       toast.error('You must be logged in to submit a review.');
       return;
     }
-    if (userReviewed) {
-      await updateReview(
-        reviews.find((review) => review.userId === authUser?.id).id,
-        formData
-      );
-      return;
-    }
-    setLoading(true);
-
-    // Check if any rating is 0
     if (Object.values(formData).some((value) => value === 0)) {
       toast.error('Please provide a rating for all categories.');
-      setLoading(false);
       return;
     }
-
-    // Check if the content is empty
     if (!formData.content.trim()) {
       toast.error('Please write a review message.');
-      setLoading(false);
       return;
     }
 
-    try {
-      const response = await reviewCar(carId, formData);
-
-      if (response) {
-        console.log('Review response:', response);
-        toast.success(response.data.message);
-      }
-    } catch (error) {
-      console.error('Error submitting review:', error);
-      const errorMessage =
-        error.response?.data?.message || 'Failed to submit review.';
-      toast.error(errorMessage);
-    } finally {
-      setLoading(false);
-    }
+    setLoading(true);
+    // Simulated submission (demo mode): always succeeds.
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    toast.success(
+      userReviewed
+        ? 'Review updated successfully.'
+        : 'Thanks for your review!'
+    );
+    setFormData({
+      exterior: 0,
+      interior: 0,
+      comfort: 0,
+      performance: 0,
+      content: '',
+    });
+    setLoading(false);
   };
 
   const handleCompareClick = () => {
@@ -410,7 +401,7 @@ const CarDetails = () => {
                     <h2 className="text-2xl font-semibold mb-4">
                       Schedule a Test Drive
                     </h2>
-                    <form action="" className="space-y-4">
+                    <form onSubmit={handleTestDriveSubmit} className="space-y-4">
                       <div className="relative">
                         <input
                           type="text"
@@ -506,7 +497,7 @@ const CarDetails = () => {
                         />
                       </button>
                     </div>
-                    <form action="" className="space-y-4">
+                    <form onSubmit={handleTestDriveSubmit} className="space-y-4">
                       <div className="relative">
                         <input
                           type="email"

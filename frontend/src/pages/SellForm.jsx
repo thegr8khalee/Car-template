@@ -24,8 +24,8 @@ const SellCarPage = () => {
     additionalNotes: '',
   });
 
-  const { submitSellForm, isSubmitting, error, successMessage } =
-    useSellStore();
+  // Demo mode: submission is simulated below; store only provides UI state.
+  const { isSubmitting, error, successMessage } = useSellStore();
 
   const [images, setImages] = useState([]);
   const [imagePreview, setImagePreview] = useState([]);
@@ -83,14 +83,9 @@ const SellCarPage = () => {
       return;
     }
 
-    const sellData = {
-      ...formData,
-      images: images, // base64 images array
-      year: parseInt(formData.year),
-      mileage: parseInt(formData.mileage),
-    };
-
-    const success = await submitSellForm(sellData);
+    // Simulated submission (demo mode): always succeeds.
+    await new Promise((resolve) => setTimeout(resolve, 600));
+    const success = true;
 
     if (success) {
       setIsSubmitted(true);

@@ -1,6 +1,19 @@
+import { useState } from 'react';
+import toast from 'react-hot-toast';
 import branding from '../config/branding';
 
 const Footer = () => {
+  const [email, setEmail] = useState('');
+
+  const handleNewsletterSubmit = async (e) => {
+    e.preventDefault();
+    if (!email.trim()) return;
+    // Simulated submission (demo mode): always succeeds.
+    await new Promise((resolve) => setTimeout(resolve, 400));
+    toast.success('Subscribed! Check your inbox for updates.');
+    setEmail('');
+  };
+
   return (
     <footer className="bg-secondary text-white py-10 px-6 font-inter flex flex-col justify-center items-center w-full mt-auto">
       {/* Top section */}
@@ -15,17 +28,25 @@ const Footer = () => {
           </p>
         </div>
 
-        <form className="w-full md:w-[50vw] inline-flex gap-2 flex-wrap justify-center">
+        <form
+          onSubmit={handleNewsletterSubmit}
+          className="w-full md:w-[50vw] inline-flex gap-2 flex-wrap justify-center"
+        >
           <div className="items-center justify-between p-1 flex w-full rounded-full bg-white/30 h-15 relative">
             <div className="h-full items-center flex w-full">
               <input
-                type="text"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email"
                 className="input w-full border-none bg-transparent text-white placeholder:text-white shadow-none px-4 focus:outline-none"
               />
             </div>
             <div className="h-full flex justify-end">
-              <button className="btn px-6 btn-primary rounded-full h-full font-normal">
+              <button
+                type="submit"
+                className="btn px-6 btn-primary rounded-full h-full font-normal"
+              >
                 Join
               </button>
             </div>

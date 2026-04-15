@@ -18,18 +18,16 @@ const SignupPage = () => {
   // React Router hook for navigation
   const navigate = useNavigate();
 
-  // Access authUser and isAdmin from the store to handle redirection if already logged in as admin
-  const { signup, isLoading, authError } = useUserAuthStore();
-  // Effect to redirect if an admin is already logged in
-  // This handles cases where an admin manually navigates to /admin/login while already authenticated
+  const { authError } = useUserAuthStore();
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Handle form submission
+  // Handle form submission (demo mode: simulated, always succeeds).
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const result = await signup(formData);
-    if (result?.emailConfirmationRequired) {
-      navigate('/verify-email-sent');
-    }
+    setIsLoading(true);
+    await new Promise((resolve) => setTimeout(resolve, 600));
+    setIsLoading(false);
+    navigate('/verify-email-sent');
   };
 
   const [isFocusedName, setIsFocusedName] = useState(false);

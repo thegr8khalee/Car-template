@@ -15,17 +15,10 @@ const LoginPage = () => {
     // anonymousId: '', // Removed as guest users are no longer in use
   });
 
-  // Access authUser and isAdmin from the store to handle redirection if already logged in as admin
-  const {
-    login,
-    isLoading,
-    authUser,
-    isAdmin,
-    forgotPassword,
-    isRequestingReset,
-    authError,
-  } = useUserAuthStore(); // Added authUser, isAdmin
-  // const { forgotPassword, isRequestingReset } = usePasswordStore(); // NEW: Destructure from usePasswordStore
+  // Demo mode: login/forgotPassword are simulated; only read auth state from store.
+  const { authUser, isAdmin, authError } = useUserAuthStore();
+  const [isLoading, setIsLoading] = useState(false);
+  const [isRequestingReset, setIsRequestingReset] = useState(false);
 
   // NEW: State for Forgot Password form
   const [showForgotPasswordForm, setShowForgotPasswordForm] = useState(false);
@@ -45,17 +38,20 @@ const LoginPage = () => {
     }
   }, [authUser, isAdmin, navigate]);
 
-  // Handle form submission for login
+  // Handle login (demo mode: simulated, always succeeds).
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await login(formData);
+    setIsLoading(true);
+    await new Promise((resolve) => setTimeout(resolve, 600));
+    setIsLoading(false);
   };
 
-  // NEW: Handle Forgot Password form submission
+  // Handle Forgot Password (demo mode: simulated, always succeeds).
   const handleForgotPasswordSubmit = async (e) => {
     e.preventDefault();
-    await forgotPassword(forgotPasswordEmail);
-    // Optionally clear email field and hide form after submission
+    setIsRequestingReset(true);
+    await new Promise((resolve) => setTimeout(resolve, 600));
+    setIsRequestingReset(false);
     setForgotPasswordEmail('');
     setShowForgotPasswordForm(false);
   };

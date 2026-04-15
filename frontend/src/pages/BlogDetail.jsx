@@ -27,7 +27,6 @@ import {
   transmission,
 } from '../config/images';
 import { useUserAuthStore } from '../store/useUserAuthStore';
-import { useInteractStore } from '../store/useInteractStore';
 import Blog from '../components/Blog';
 
 const BlogDetail = () => {
@@ -42,7 +41,7 @@ const BlogDetail = () => {
     getRelatedBlogsById,
   } = useBlogStore();
   const { authUser } = useUserAuthStore();
-  const { commentBlog, updateComment } = useInteractStore();
+  // Demo mode: comment submission is simulated — no store call.
 
   const [commentForm, setCommentForm] = useState({
     name: authUser?.username || '',
@@ -97,26 +96,16 @@ const BlogDetail = () => {
     }));
   };
 
-  // Handle comment form submission
+  // Handle comment form submission (demo mode: simulated, always succeeds)
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
     if (!commentForm.comment.trim()) {
       return;
     }
     setIsSubmittingComment(true);
-    try {
-      if (userComment) {
-        await updateComment(userComment.id, commentForm.comment);
-        return;
-      }
-      await commentBlog(id, commentForm.comment);
-      setCommentForm((prev) => ({ ...prev, comment: '' }));
-      // Optionally, you can refetch comments here if your store supports it
-    } catch (error) {
-      console.error('Failed to submit comment:', error);
-    } finally {
-      setIsSubmittingComment(false);
-    }
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    setCommentForm((prev) => ({ ...prev, comment: '' }));
+    setIsSubmittingComment(false);
   };
 
   // Navigation handlers
