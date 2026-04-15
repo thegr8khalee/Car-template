@@ -68,12 +68,6 @@ router.get(
   getListings
 );
 router.get('/getBlogs', protectAdminRoute, requireRole(['super_admin', 'editor']), getAllBlogs);
-router.get(
-  '/getListings',
-  protectAdminRoute,
-  requireRole(['super_admin', 'editor', 'moderator']),
-  getListings
-);
 router.get('/getStaffs', protectAdminRoute, requireRole(['super_admin']), getStaffs);
 router.get('/getUsers', protectAdminRoute, requireRole(['super_admin', 'editor', 'moderator']), getUsers);
 router.get('/comments/stats', protectAdminRoute, requireRole(['super_admin', 'editor', 'moderator']), getCommentsStats);

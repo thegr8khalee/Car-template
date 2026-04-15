@@ -1,4 +1,5 @@
-import React, { useState, useEffect, use } from 'react';
+import React, { useState, useEffect } from 'react';
+import DOMPurify from 'dompurify';
 import { useParams, useNavigate } from 'react-router-dom';
 import Breadcrumbs from '../components/BreadCrumbs';
 import BlogCard from '../components/BlogCard';
@@ -257,9 +258,10 @@ const BlogDetail = () => {
           <article className="prose prose-lg max-w-none mb-8">
             <div
               dangerouslySetInnerHTML={{
-                __html:
+                __html: DOMPurify.sanitize(
                   blogDetail.content ||
-                  '<p>Content is loading or not available at the moment.</p>',
+                    '<p>Content is loading or not available at the moment.</p>'
+                ),
               }}
             />
           </article>
@@ -513,7 +515,7 @@ const BlogDetail = () => {
               {relatedBlogs && relatedBlogs.length > 0 ? (
                 relatedBlogs.map((blog) => (
                   <Blog
-                   key={blog.title} item={{ ...blog }}
+                   key={blog.id ?? blog.title} item={{ ...blog }}
                   />
                 ))
               ) : (

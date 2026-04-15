@@ -45,8 +45,8 @@ export const signup = async (req, res) => {
       res.cookie('jwt', authData.session.access_token, {
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
         httpOnly: true,
-        sameSite: 'strict',
-        secure: process.env.NODE_ENV !== 'development',
+        sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
+        secure: process.env.NODE_ENV === 'production',
       });
 
       res.status(201).json({
@@ -101,8 +101,8 @@ export const login = async (req, res) => {
     res.cookie('jwt', data.session.access_token, {
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       httpOnly: true,
-      sameSite: 'strict',
-      secure: process.env.NODE_ENV !== 'development',
+      sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
+      secure: process.env.NODE_ENV === 'production',
     });
 
     res.status(200).json({
@@ -130,6 +130,7 @@ export const logout = async (req, res) => {
     res.cookie('jwt', '', {
       maxAge: 0,
       httpOnly: true,
+      sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
       secure: process.env.NODE_ENV === 'production',
     });
     res.status(200).json({ message: 'Logged Out successfully' });
@@ -319,6 +320,13 @@ export const deleteAccount = async (req, res) => {
       return res.status(404).json({ message: 'Account not found or already deleted.' });
     }
 
+    // Delete the Supabase auth user so credentials cannot be reused.
+    try {
+      await supabase.auth.admin.deleteUser(userId);
+    } catch (supaErr) {
+      console.error('Supabase deleteUser error:', supaErr?.message || supaErr);
+    }
+
     // Use Sequelize's destroy method to delete the record
     await user.destroy();
 
@@ -364,53 +372,14 @@ export const forgotPassword = async (req, res) => {
       });
     }
 
-    const resetToken = crypto.randomBytes(32).toString('hex');
-    const resetTokenHash = crypto
-      .createHash('sha256')
-      .update(resetToken)
-      .digest('hex');
-
-    const resetTokenExpiry = Date.now() + 3600000;
-
-    user.passwordResetToken = resetTokenHash;
-    user.passwordResetExpires = resetTokenExpiry;
-    await user.save();
-
-    const resetUrl = `${process.env.CLIENT_URL}/reset-password/${resetToken}`;
-
-    const transporter = nodemailer.createTransport({
-      service: 'Gmail',
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
-
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: user.email,
-      subject: 'Password Reset Request for Your Account',
-      html: `
-        <p>Hello ${user.username || user.email},</p>
-        <p>You are receiving this because you (or someone else) have requested the reset of the password for your account.</p>
-        <p>Please click on the following link to reset your password:</p>
-        <p><a href="${resetUrl}" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">Reset Password</a></p>
-        <p>Or copy and paste this URL into your browser:</p>
-        <p><code>${resetUrl}</code></p>
-        <p>This link is valid for 1 hour. After that, you will need to request a new one.</p>
-        <p>If you did not request this, please ignore this email and your password will remain unchanged.</p>
-        <p>Thank you,</p>
-        <p>Meenable Pyramids Team</p>
-      `,
-    };
-
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.error('Error sending password reset email:', error);
-      } else {
-        console.log('Password reset email sent: %s', info.messageId);
-      }
-    });
+    const redirectTo = `${process.env.CLIENT_URL}/reset-password`;
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(
+      email,
+      { redirectTo }
+    );
+    if (resetError) {
+      console.error('Supabase reset email error:', resetError.message);
+    }
 
     res.status(200).json({
       message:
@@ -423,44 +392,31 @@ export const forgotPassword = async (req, res) => {
 };
 
 export const resetPassword = async (req, res) => {
-  const { token } = req.params;
-  const { newPassword } = req.body;
+  // With Supabase, password reset is completed on the client after the user
+  // clicks the email link. This endpoint accepts the recovery access token
+  // (obtained on the client from the redirect URL hash) and the new password.
+  const { accessToken, newPassword } = req.body;
 
-  if (!newPassword) {
-    return res.status(400).json({ message: 'Please provide a new password.' });
+  if (!accessToken) {
+    return res.status(400).json({ message: 'Missing recovery access token.' });
   }
-  if (newPassword.length < 6) {
+  if (!newPassword || newPassword.length < 8) {
     return res
       .status(400)
-      .json({ message: 'New password must be at least 6 characters long.' });
+      .json({ message: 'New password must be at least 8 characters long.' });
   }
 
   try {
-    const resetTokenHash = crypto
-      .createHash('sha256')
-      .update(token)
-      .digest('hex');
+    const { error } = await supabase.auth.admin.updateUserById
+      ? await supabase.auth.admin.updateUserById(
+          (await supabase.auth.getUser(accessToken)).data?.user?.id,
+          { password: newPassword }
+        )
+      : await supabase.auth.updateUser({ password: newPassword });
 
-    // Use Op.gt for the "$gt" (greater than) operator
-    const user = await User.findOne({
-      where: {
-        passwordResetToken: resetTokenHash,
-        passwordResetExpires: { [Op.gt]: Date.now() },
-      },
-    });
-
-    if (!user) {
-      return res
-        .status(400)
-        .json({ message: 'Password reset token is invalid or has expired.' });
+    if (error) {
+      return res.status(400).json({ message: error.message });
     }
-
-    const salt = await bcrypt.genSalt(10);
-    user.passwordHash = await bcrypt.hash(newPassword, salt);
-
-    user.passwordResetToken = null; // Set to null instead of undefined
-    user.passwordResetExpires = null; // Set to null instead of undefined
-    await user.save();
 
     res.status(200).json({ message: 'Password has been reset successfully.' });
   } catch (error) {
@@ -470,17 +426,12 @@ export const resetPassword = async (req, res) => {
 };
 
 export const changePassword = async (req, res) => {
-  const { oldPassword, newPassword } = req.body;
+  const { newPassword } = req.body;
 
-  if (!oldPassword || !newPassword) {
+  if (!newPassword || newPassword.length < 8) {
     return res
       .status(400)
-      .json({ message: 'Please provide both old and new passwords.' });
-  }
-  if (newPassword.length < 6) {
-    return res
-      .status(400)
-      .json({ message: 'New password must be at least 6 characters long.' });
+      .json({ message: 'New password must be at least 8 characters long.' });
   }
 
   if (!req.user || !req.user.id) {
@@ -490,24 +441,12 @@ export const changePassword = async (req, res) => {
   }
 
   try {
-    // Use findByPk to find the user by their primary key
-    const user = await User.findByPk(req.user.id);
-
-    if (!user) {
-      return res.status(404).json({ message: 'User not found.' });
+    const { error } = await supabase.auth.admin.updateUserById(req.user.id, {
+      password: newPassword,
+    });
+    if (error) {
+      return res.status(400).json({ message: error.message });
     }
-
-    const isPasswordCorrect = await bcrypt.compare(
-      oldPassword,
-      user.passwordHash
-    );
-    if (!isPasswordCorrect) {
-      return res.status(400).json({ message: 'Incorrect old password.' });
-    }
-
-    const salt = await bcrypt.genSalt(10);
-    user.passwordHash = await bcrypt.hash(newPassword, salt);
-    await user.save();
 
     res.status(200).json({ message: 'Password changed successfully.' });
   } catch (error) {

@@ -13,8 +13,11 @@ const sequelize = new Sequelize(process.env.DATABASE_URL, {
   dialectOptions: {
     ssl: {
       require: true,
-      rejectUnauthorized: false
-    }
+      // Supabase/managed Postgres often terminates TLS with a cert chain
+      // that Node's default bundle doesn't trust. Allow overriding via env
+      // so production can pin to a CA when available.
+      rejectUnauthorized: process.env.DB_SSL_REJECT_UNAUTHORIZED === 'true',
+    },
   },
 
   // Connection pool - reduced for stability
@@ -23,31 +26,24 @@ const sequelize = new Sequelize(process.env.DATABASE_URL, {
     min: 0,
     acquire: 90000,
     idle: 10000,
-    evict: 10000
+    evict: 10000,
   },
 
   // Retry configuration
   retry: {
     max: 3,
     backoffBase: 1000,
-    backoffExponent: 1.5
+    backoffExponent: 1.5,
   },
 
-  // Timezone
   timezone: '+00:00',
 
-  // Model definition defaults
   define: {
     timestamps: true,
     underscored: false,
     paranoid: false,
     freezeTableName: false,
   },
-
-  // Retry on failure
-  retry: {
-    max: 3
-  }
 });
 
 export default sequelize;

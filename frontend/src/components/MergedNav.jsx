@@ -148,7 +148,7 @@ const MergedNav = () => {
                   isScrolled || !isHomepage ? 'text-primary' : 'text-white'
                 } font-geist text-xl sm:text-2xl flex lg:flex font-extrabold pointer-events-auto`}
               >
-                Elite Cars
+                Demo Cars
               </div>
             </Link>
             <div className=" flex space-x-2 justify-center items-center">

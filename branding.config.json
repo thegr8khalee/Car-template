@@ -1,7 +1,7 @@
 {
   "company": {
-    "name": "Elite Cars",
-    "legalName": "Elite Cars Automobile",
+    "name": "Demo Cars",
+    "legalName": "Demo Cars Automobile",
     "tagline": "Where automotive dreams meet expert guidance",
     "ceo": {
       "name": "Saminu",
@@ -9,7 +9,7 @@
     }
   },
   "branding": {
-    "logoAlt": "Elite Cars logo",
+    "logoAlt": "Demo Cars logo",
     "colors": {
       "primary": "#ff0000",
       "secondary": "#000000",
@@ -39,9 +39,9 @@
   },
   "contact": {
     "emails": {
-      "info": "info@elitecars.com",
-      "support": "support@elitecars.com",
-      "sales": "sales@elitecars.com"
+      "info": "info@Democars.com",
+      "support": "support@Democars.com",
+      "sales": "sales@Democars.com"
     },
     "phones": {
       "main": {

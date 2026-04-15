@@ -49,16 +49,18 @@ const CarDetails = () => {
 
   useEffect(() => {
     getCarById(id);
+  }, [getCarById, id]);
 
+  const car = currentCar?.car;
+
+  useEffect(() => {
     if (car?.imageUrls) {
       car.imageUrls.forEach((url) => {
         const img = new Image();
         img.src = url;
       });
     }
-  }, [getCarById, id]);
-
-  const car = currentCar?.car;
+  }, [car]);
   const reviews = currentCar?.reviews || [];
   const averageRatings = currentCar?.averageRatings || {
     interior: 0,
@@ -973,10 +975,11 @@ const CarDetails = () => {
           <section id="related-cars" className="w-full my-8">
             <h1 className="text-2xl font-bold">Related Cars</h1>
             <div className="flex overflow-x-auto w-full space-x-2 pl-1">
-              {currentCar?.relatedCars.map((relatedCar) => (
+              {(currentCar?.relatedCars ?? []).map((relatedCar) => (
                 <CarCard
+                  key={relatedCar.id}
                   className="flex-shrink-0"
-                  image={relatedCar.imageUrls[0]}
+                  image={relatedCar.imageUrls?.[0]}
                   title={relatedCar.make + ' ' + relatedCar.model}
                   description={relatedCar.description}
                   mileage={{ icon: mileage, value: relatedCar.mileage }}
@@ -990,6 +993,9 @@ const CarDetails = () => {
                   link={`/car/${relatedCar.id}`}
                 />
               ))}
+              {(currentCar?.relatedCars?.length ?? 0) === 0 && !isLoading && (
+                <p className="text-sm opacity-60">No related cars yet.</p>
+              )}
             </div>
             <div className="w-full flex justify-end pr-2">
               <button
@@ -1837,10 +1843,11 @@ const CarDetails = () => {
           <section id="related-cars" className="w-full my-8">
             <h1 className="text-2xl font-bold">Related Cars</h1>
             <div className="flex overflow-x-auto w-full space-x-2 pl-1">
-              {currentCar?.relatedCars.map((relatedCar) => (
+              {(currentCar?.relatedCars ?? []).map((relatedCar) => (
                 <CarCard
+                  key={relatedCar.id}
                   className="flex-shrink-0"
-                  image={relatedCar.imageUrls[0]}
+                  image={relatedCar.imageUrls?.[0]}
                   title={relatedCar.make + ' ' + relatedCar.model}
                   description={relatedCar.description}
                   mileage={{ icon: mileage, value: relatedCar.mileage }}
@@ -1854,6 +1861,9 @@ const CarDetails = () => {
                   link={`/car/${relatedCar.id}`}
                 />
               ))}
+              {(currentCar?.relatedCars?.length ?? 0) === 0 && !isLoading && (
+                <p className="text-sm opacity-60">No related cars yet.</p>
+              )}
             </div>
             <div className="w-full flex justify-end pr-2">
               <button

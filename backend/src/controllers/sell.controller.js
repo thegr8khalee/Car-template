@@ -23,6 +23,39 @@ export const submitSellForm = async (req, res) => {
             });
         }
 
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(emailAddress)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid email address.',
+            });
+        }
+
+        const phoneDigits = String(phoneNumber).replace(/[^\d]/g, '');
+        if (phoneDigits.length < 7 || phoneDigits.length > 15) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid phone number.',
+            });
+        }
+
+        const year = Number(yearOfManufacture);
+        const currentYear = new Date().getFullYear();
+        if (!Number.isFinite(year) || year < 1900 || year > currentYear + 1) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid year of manufacture.',
+            });
+        }
+
+        const mileage = Number(mileageKm);
+        if (!Number.isFinite(mileage) || mileage < 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid mileage.',
+            });
+        }
+
         let imageUrls = [];
         if (uploadPhotos && Array.isArray(uploadPhotos) && uploadPhotos.length > 0) {
             const uploadedImages = await uploadImagesToCloudinary(uploadPhotos);

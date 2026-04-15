@@ -76,16 +76,40 @@ export const getCarById = async (req, res) => {
       return res.status(404).json({ message: 'Car not found' });
     }
 
-    // Find up to 4 related cars that share similar attributes.
-    // Optimized: Prioritize Category match only for performance
-    const relatedCars = await Car.findAll({
-      where: {
-        id: { [Op.ne]: car.id }, // Exclude the current car
-        category: car.category,  // Simple index-friendly lookup
-      },
-      limit: 4, // Limit the number of related cars
-      order: [['createdAt', 'DESC']] // Most recent first
-    });
+    // Find up to 4 related cars. Try category first; fall back to make,
+    // then to any other cars so the section always has something to show.
+    const pickLimit = 4;
+    const excludeSelf = { id: { [Op.ne]: car.id } };
+    const baseOrder = [['createdAt', 'DESC']];
+
+    let relatedCars = [];
+    if (car.category) {
+      relatedCars = await Car.findAll({
+        where: { ...excludeSelf, category: car.category },
+        limit: pickLimit,
+        order: baseOrder,
+      });
+    }
+
+    if (relatedCars.length < pickLimit && car.make) {
+      const excludeIds = [car.id, ...relatedCars.map((c) => c.id)];
+      const extra = await Car.findAll({
+        where: { id: { [Op.notIn]: excludeIds }, make: car.make },
+        limit: pickLimit - relatedCars.length,
+        order: baseOrder,
+      });
+      relatedCars = [...relatedCars, ...extra];
+    }
+
+    if (relatedCars.length < pickLimit) {
+      const excludeIds = [car.id, ...relatedCars.map((c) => c.id)];
+      const extra = await Car.findAll({
+        where: { id: { [Op.notIn]: excludeIds } },
+        limit: pickLimit - relatedCars.length,
+        order: baseOrder,
+      });
+      relatedCars = [...relatedCars, ...extra];
+    }
 
     // Find all approved reviews for the primary car
     const reviews = await Review.findAll({

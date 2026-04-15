@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
+import process from 'node:process';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -19,11 +20,13 @@ export default defineConfig({
     fs: {
       allow: [resolve(__dirname, '..')],
     },
-    host: true, // allow external access (important for ngrok)
-    origin: 'https://43160d029324.ngrok-free.app', // set correct origin
-    cors: {
-      origin: 'https://43160d029324.ngrok-free.app',
-      credentials: true,
-    },
+    host: true, // allow external access (e.g. ngrok tunnels)
+    // Override at runtime via VITE_DEV_ORIGIN when tunneling in.
+    ...(process.env.VITE_DEV_ORIGIN
+      ? {
+          origin: process.env.VITE_DEV_ORIGIN,
+          cors: { origin: process.env.VITE_DEV_ORIGIN, credentials: true },
+        }
+      : {}),
   },
 });

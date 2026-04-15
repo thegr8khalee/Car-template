@@ -8,6 +8,7 @@ import { useUserAuthStore } from './store/useUserAuthStore';
 import AdminProtectedRoute from './components/AdminProtectedRoute';
 import ScrollToTop from './components/ScrollToTop';
 import MergedNavbar from './components/MergedNav';
+import ErrorBoundary from './components/ErrorBoundary';
 
 // Lazy load pages
 const Home = React.lazy(() => import('./pages/Home'));
@@ -36,6 +37,7 @@ const Categories = React.lazy(() => import('./pages/Categories'));
 const About = React.lazy(() => import('./pages/About'));
 const PrivacyPolicy = React.lazy(() => import('./pages/PrivacyPolicy'));
 const EmailVerificationSentPage = React.lazy(() => import('./pages/EmailVerificationSentPage'));
+const NotFound = React.lazy(() => import('./pages/NotFound'));
 
 // Loading component
 const PageLoader = () => (
@@ -63,6 +65,7 @@ function App() {
       {/* <Navbar className="z-100" /> */}
       {showFooter && <MergedNavbar className="z-100" />}
       <main className="flex-grow">
+       <ErrorBoundary>
         <Suspense fallback={<PageLoader />}>
           <Routes>
             <Route path="/" element={<Home />} />
@@ -109,8 +112,10 @@ function App() {
               <Route path="/admin/staff/edit/:id" element={<EditStaffPage />} />
               <Route path="/admin/broadcast/new" element={<NewBroadcastPage />} />
             </Route>
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
+       </ErrorBoundary>
 
         <Toaster />
       </main>

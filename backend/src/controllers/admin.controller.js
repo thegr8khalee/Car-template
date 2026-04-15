@@ -2,6 +2,10 @@ import Admin from '../models/admin.model.js';
 import { supabase } from '../lib/supabase.js';
 import { Op } from 'sequelize';
 import cloudinary from '../lib/cloudinary.js';
+import {
+  hasPermission,
+  sanitizeQueryParams,
+} from '../lib/dashboard.utils.js';
 
 export const adminSignup = async (req, res) => {
   const { username, email, password, position, role, avatar, bio } = req.body;
@@ -53,7 +57,8 @@ export const adminSignup = async (req, res) => {
     // If an avatar is provided, upload it to Cloudinary
     if (avatar) {
       const uploadResponse = await cloudinary.uploader.upload(avatar, {
-        upload_preset: 'your_upload_preset', // Replace with your unsigned upload preset
+        folder: 'admins/avatars',
+        resource_type: 'image',
       });
       avatarUrl = uploadResponse.secure_url;
     }
@@ -381,19 +386,13 @@ export const changePassword = async (req, res) => {
       });
     }
 
-    // Verify current password
-    const isValidPassword = await bcrypt.compare(
-      currentPassword,
-      admin.passwordHash
-    );
-    if (!isValidPassword) {
+    if (!currentPassword || !newPassword) {
       return res.status(400).json({
         success: false,
-        message: 'Current password is incorrect',
+        message: 'Current and new passwords are required',
       });
     }
 
-    // Validate new password
     if (newPassword.length < 8) {
       return res.status(400).json({
         success: false,
@@ -401,11 +400,27 @@ export const changePassword = async (req, res) => {
       });
     }
 
-    // Hash new password
-    const saltRounds = 12;
-    const passwordHash = await bcrypt.hash(newPassword, saltRounds);
+    // Re-authenticate with Supabase to validate the current password.
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: admin.email,
+      password: currentPassword,
+    });
+    if (signInError) {
+      return res.status(400).json({
+        success: false,
+        message: 'Current password is incorrect',
+      });
+    }
 
-    await admin.update({ passwordHash });
+    const { error: updateError } = await supabase.auth.admin.updateUserById(
+      admin.id,
+      { password: newPassword }
+    );
+    if (updateError) {
+      return res
+        .status(400)
+        .json({ success: false, message: updateError.message });
+    }
 
     res.status(200).json({
       success: true,
